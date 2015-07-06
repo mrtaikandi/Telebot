@@ -1,0 +1,34 @@
+{
+  "userSecretsId": "aspnet5-TelebotConsole-20150706122634",
+  "version": "1.0.0-*",
+  "description": "Test console for Telebot library.",
+  "authors": [ "Mohammadreza Taikandi" ],
+  "tags": [ "" ],
+  "projectUrl": "",
+  "licenseUrl": "",
+
+  "dependencies": {
+    "Telebot": "1.0.0-*",
+    "Newtonsoft.Json": "7.0.1",    
+    "Microsoft.Framework.Runtime.Abstractions": "1.0.0-beta*",
+    "Microsoft.Framework.Configuration": "1.0.0-beta*",
+    "Microsoft.Framework.Configuration.UserSecrets": "1.0.0-beta*"
+  },
+
+  "commands": {
+    "TelebotConsole": "TelebotConsole"
+  },
+
+  "frameworks": {
+    "dnx451": { },
+    "dnxcore50": {
+      "dependencies": {
+        "System.Console": "4.0.0-beta-*",
+        "System.Collections": "4.0.10-beta-*",
+        "System.Linq": "4.0.0-beta-*",
+        "System.Threading": "4.0.10-beta-*",
+        "Microsoft.CSharp": "4.0.0-beta-*"        
+      }
+    }
+  }
+}

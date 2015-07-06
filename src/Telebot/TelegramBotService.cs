@@ -4,7 +4,9 @@
     using System.Collections.Generic;
     using System.Net.Http;
     using System.Threading.Tasks;
-    
+
+    using JetBrains.Annotations;
+
     using Newtonsoft.Json;
 
     using Types;
@@ -12,8 +14,6 @@
     public class Telebot : IDisposable
     {
         #region Constants and Fields
-
-        protected string ApiKey { get; }
 
         private HttpClient _client;
 
@@ -24,9 +24,12 @@
         #region Constructors and Destructors
 
         /// <summary>
+        /// Initializes a new instance of the <see cref="Telebot"/> class. 
         /// Initializes a new instance of <see cref="Telebot"/>.
         /// </summary>
-        /// <param name="apiKey">Telegram API key.</param>
+        /// <param name="apiKey">
+        /// Telegram API key.
+        /// </param>
         public Telebot(string apiKey)
         {
             this.ApiKey = apiKey;
@@ -37,6 +40,12 @@
         #region Public Properties
 
         public HttpClient Client => this._client ?? (this._client = this.CreateHttpClient());
+
+        #endregion
+
+        #region Properties
+
+        protected string ApiKey { get; }
 
         #endregion
 
@@ -55,7 +64,38 @@
         }
 
         /// <summary>
-        /// A simple method for testing your bot's auth token. Requires no parameters. 
+        /// Forwards message of any kind. On success, the sent <see cref="Message"/> is returned.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="fromChatId">
+        /// Unique identifier for the chat where the original message was sent, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="messageId">
+        /// Unique message identifier
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> ForwardMessageAsync(int chatId, int fromChatId, int messageId)
+        {
+            var parameters = new NameValueCollection
+                {
+                    { "chat_id", chatId.ToString() }, 
+                    { "from_chat_id", fromChatId.ToString() }, 
+                    { "message_id", messageId.ToString() }
+                };
+
+            var content = new FormUrlEncodedContent(parameters);
+            var response = await this.Client.PostAsync("forwardMessage", content).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// A simple method for testing your bot's auth token. Requires no parameters.
         /// Returns basic information about the bot in form of a User object.
         /// </summary>
         /// <returns>Basic information about the bot in form of a User object.</returns>
@@ -68,37 +108,23 @@
         }
 
         /// <summary>
-        /// Use this method to specify a url and receive incoming updates via an outgoing webhook.
-        /// </summary>
-        /// <param name="url">HTTPS url to send updates to. Use an empty string to remove webhook integration</param>
-        /// <returns>
-        /// Continues task.
-        /// </returns>
-        /// <remarks>
-        /// Whenever there is an update for the bot, we will send an HTTPS POST request to the specified url, 
-        /// containing a JSON-serialized <see cref="Update"/>. In case of an unsuccessful request, 
-        /// we will give up after a reasonable amount of attempts.
+        /// Use this method to receive incoming updates using long polling.
         /// <para>
-        /// If you'd like to make sure that the Webhook request comes from Telegram, we recommend using 
-        /// a secret path in the URL, e.g. <c>www.example.com/YOUR_TOKEN</c>. Since nobody else knows your 
-        /// bot‘s token, you can be pretty sure it’s us.
-        /// </para>        
-        /// </remarks>
-        public async Task SetWebhookAsync(string url)
-        {
-            await this.Client.PostAsync(url, null).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// Use this method to receive incoming updates using long polling. 
-        /// <para>Note: In order to avoid getting duplicate updates, recalculate offset after each server response.</para>
+        /// Note: In order to avoid getting duplicate updates, recalculate offset after each server response.
+        /// </para>
         /// </summary>
-        /// <param name="offset">Identifier of the first update to be returned. Must be greater by one than the highest among
+        /// <param name="offset">
+        /// Identifier of the first update to be returned. Must be greater by one than the highest among
         /// the identifiers of previously received updates. By default, updates starting with the earliest
         /// unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is
-        /// called with an offset higher than its update_id.</param>
-        /// <param name="limit">Limits the number of updates to be retrieved. Values between 1—100 are accepted. Defaults to 100.</param>
-        /// <param name="timeout">Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling.</param>
+        /// called with an offset higher than its update_id.
+        /// </param>
+        /// <param name="limit">
+        /// Limits the number of updates to be retrieved. Values between 1—100 are accepted. Defaults to 100.
+        /// </param>
+        /// <param name="timeout">
+        /// Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling.
+        /// </param>
         /// <returns>
         /// An Array of Update objects.
         /// </returns>
@@ -114,54 +140,141 @@
         }
 
         /// <summary>
-        /// Use this method to send text messages. On success, the sent Message is returned.
+        /// Sends a text message. On success, the sent <see cref="Message"/> is returned.
         /// </summary>
-        /// <param name="chatId">Unique identifier for the message recipient — <see cref="User"/> or <see cref="GroupChat"/> id.</param>
-        /// <param name="text">Text of the message to be sent.</param>
-        /// <param name="disableWebPagePreview">if set to <c>true</c> disables link previews for links in this message.</param>
-        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
-        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the user.</param>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient — <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="text">
+        /// Text of the message to be sent.
+        /// </param>
+        /// <param name="disableWebPagePreview">
+        /// if set to <c>true</c> disables link previews for links in this message.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
         /// <returns>
-        /// The sent Message.
+        /// On success, returns the sent <see cref="Message"/>.
         /// </returns>
-        public async Task<Message> SendMessage(int chatId, string text, bool disableWebPagePreview = false, int replyToMessageId = -1, IReply replyMarkup = null)
+        public async Task<TelegramResult<Message>> SendMessageAsync(int chatId, [NotNull] string text, bool disableWebPagePreview = false, int replyToMessageId = -1, IReply replyMarkup = null)
         {
-            var parameters = new List<KeyValuePair<string, string>>
+            if( text == null )
+                throw new ArgumentNullException(nameof(text));
+
+            var parameters = new NameValueCollection
                 {
-                    new KeyValuePair<string, string>("chat_id", chatId.ToString()),
-                    new KeyValuePair<string, string>("text", text),
+                    { "chat_id", chatId.ToString() }, 
+                    { "text", text }
                 };
 
-            if(disableWebPagePreview)
-                parameters.Add(new KeyValuePair<string, string>("disable_web_page_preview", "true"));
+            if( disableWebPagePreview )
+                parameters.Add("disable_web_page_preview", "true");
 
-            if(replyToMessageId >= 0)
-                parameters.Add(new KeyValuePair<string, string>("reply_to_message_id", replyToMessageId.ToString()));
+            if( replyToMessageId >= 0 )
+                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
 
             if( replyMarkup != null )
-                parameters.Add(new KeyValuePair<string, string>("reply_markup", JsonConvert.SerializeObject(replyMarkup)));
+                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
 
             var content = new FormUrlEncodedContent(parameters);
             var response = await this.Client.PostAsync("sendMessage", content).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadAsAsync<Message>().ConfigureAwait(false);
+            return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
         }
-        
+
+        /// <summary>
+        /// Sends a photo. On success, the sent <see cref="Message"/> is returned.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="photoId">
+        /// A file id as string to resend a photo that is already on the Telegram servers.
+        /// </param>
+        /// <param name="caption">
+        /// Photo caption (may also be used when resending photos by file id).
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> SendPhotoAsync(int chatId, [NotNull] string photoId, string caption = null, int replyToMessageId = -1, IReply replyMarkup = null)
+        {
+            if( string.IsNullOrWhiteSpace(photoId) )
+                throw new ArgumentNullException(nameof(photoId));
+
+            var parameters = new NameValueCollection
+                {
+                    { "chat_id", chatId.ToString() }, 
+                    { "photo_id", photoId }
+                };
+
+            if( !string.IsNullOrWhiteSpace(caption) )
+                parameters.Add("caption", caption);
+
+            if( replyToMessageId >= 0 )
+                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
+
+            if( replyMarkup != null )
+                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
+
+            var content = new FormUrlEncodedContent(parameters);
+            var response = await this.Client.PostAsync("forwardMessage", content).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+
+            return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Use this method to specify a url and receive incoming updates via an outgoing webhook.
+        /// </summary>
+        /// <param name="url">
+        /// HTTPS url to send updates to. Use an empty string to remove webhook integration
+        /// </param>
+        /// <returns>
+        /// Continues task.
+        /// </returns>
+        /// <remarks>
+        /// Whenever there is an update for the bot, we will send an HTTPS POST request to the specified url,
+        /// containing a JSON-serialized <see cref="Update"/>. In case of an unsuccessful request,
+        /// we will give up after a reasonable amount of attempts.
+        /// <para>
+        /// If you'd like to make sure that the Webhook request comes from Telegram, we recommend using
+        /// a secret path in the URL, e.g. <c>www.example.com/YOUR_TOKEN</c>. Since nobody else knows your
+        /// bot‘s token, you can be pretty sure it’s us.
+        /// </para>
+        /// </remarks>
+        public async Task SetWebhookAsync(string url)
+        {
+            await this.Client.PostAsync(url, null).ConfigureAwait(false);
+        }
+
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// Creates a new instance of <see cref="HttpClient"/> to connect to the Telegram bot API.
+        /// Creates a new instance of <see cref="HttpClient" /> to connect to the Telegram bot API.
         /// </summary>
-        /// <returns>A new instance of <see cref="HttpClient"/> configured to connect to the Telegram bot API.</returns>
+        /// <returns>A new instance of <see cref="HttpClient" /> configured to connect to the Telegram bot API.</returns>
         protected virtual HttpClient CreateHttpClient()
         {
             var client = new HttpClient
-            {
-                BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
-            };
+                {
+                    BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
+                };
 
             return client;
         }

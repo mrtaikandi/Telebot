@@ -27,7 +27,7 @@
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            writer.WriteRawValue(Convert.ToString(((DateTime)value - UnixStart).TotalSeconds, CultureInfo.InvariantCulture));
+            writer.WriteRawValue(Convert.ToString(((DateTimeOffset)value - UnixStart).TotalSeconds, CultureInfo.InvariantCulture));
         }
 
         #endregion

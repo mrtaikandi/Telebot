@@ -12,6 +12,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "Telebot", "src\Telebot\Telebot.xproj", "{75A958F6-7423-4FCA-9FBE-F0162DA5018F}"
 EndProject
+Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "TelebotConsole", "src\TelebotConsole\TelebotConsole.xproj", "{F1CCC999-4F06-4DE9-BA55-B993FC87FA21}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,11 +24,16 @@ Global
 		{75A958F6-7423-4FCA-9FBE-F0162DA5018F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{75A958F6-7423-4FCA-9FBE-F0162DA5018F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{75A958F6-7423-4FCA-9FBE-F0162DA5018F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F1CCC999-4F06-4DE9-BA55-B993FC87FA21}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F1CCC999-4F06-4DE9-BA55-B993FC87FA21}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F1CCC999-4F06-4DE9-BA55-B993FC87FA21}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F1CCC999-4F06-4DE9-BA55-B993FC87FA21}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{75A958F6-7423-4FCA-9FBE-F0162DA5018F} = {81187C50-5925-48CD-B863-49441185CF45}
+		{F1CCC999-4F06-4DE9-BA55-B993FC87FA21} = {81187C50-5925-48CD-B863-49441185CF45}
 	EndGlobalSection
 EndGlobal
