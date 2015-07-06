@@ -1,6 +1,6 @@
 ﻿{
   "title": "Telebot",
-  "version": "1.0.0-beta-1567",
+  "version": "1.0.0-beta-1570",
   "description": "Telegram Bot API client library for .NET.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "" ],
