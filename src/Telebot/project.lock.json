@@ -2,6 +2,78 @@
   "locked": false,
   "version": 1,
   "targets": {
+    ".NETFramework,Version=v4.5": {
+      "Microsoft.AspNet.WebApi.Client/5.2.3": {
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        },
+        "runtime": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Newtonsoft.Json/7.0.1": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5.1": {
+      "Microsoft.AspNet.WebApi.Client/5.2.3": {
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        },
+        "runtime": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Newtonsoft.Json/7.0.1": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    },
+    ".NETFramework,Version=v4.5.2": {
+      "Microsoft.AspNet.WebApi.Client/5.2.3": {
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        },
+        "runtime": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Newtonsoft.Json/7.0.1": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    },
     "DNX,Version=v4.5.1": {
       "Microsoft.AspNet.WebApi.Client/5.2.3": {
         "dependencies": {
@@ -1662,6 +1734,9 @@
       "Newtonsoft.Json >= 7.0.1",
       "Microsoft.AspNet.WebApi.Client >= 5.2.3"
     ],
+    ".NETFramework,Version=v4.5": [],
+    ".NETFramework,Version=v4.5.1": [],
+    ".NETFramework,Version=v4.5.2": [],
     "DNX,Version=v4.5.1": [],
     "DNXCore,Version=v5.0": [
       "System.Runtime.Extensions >= 4.0.10-beta-*",

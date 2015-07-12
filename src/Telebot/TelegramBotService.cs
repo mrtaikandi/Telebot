@@ -2,7 +2,11 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Globalization;
+    using System.IO;
     using System.Net.Http;
+    using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     using JetBrains.Annotations;
@@ -24,14 +28,16 @@
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Telebot"/> class. 
-        /// Initializes a new instance of <see cref="Telebot"/>.
+        /// Initializes a new instance of the <see cref="Telebot"/> class.
         /// </summary>
         /// <param name="apiKey">
         /// Telegram API key.
         /// </param>
-        public Telebot(string apiKey)
+        public Telebot([NotNull] string apiKey)
         {
+            if( string.IsNullOrWhiteSpace(apiKey) )
+                throw new ArgumentNullException(nameof(apiKey));
+
             this.ApiKey = apiKey;
         }
 
@@ -64,7 +70,7 @@
         }
 
         /// <summary>
-        /// Forwards message of any kind. On success, the sent <see cref="Message"/> is returned.
+        /// Forwards message of any kind.
         /// </summary>
         /// <param name="chatId">
         /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
@@ -102,8 +108,8 @@
         public async Task<TelegramResult<User>> GetMeAsync()
         {
             var response = await this.Client.GetAsync("getMe").ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
 
+            response.EnsureSuccessStatusCode();
             return await response.Content.ReadAsAsync<TelegramResult<User>>().ConfigureAwait(false);
         }
 
@@ -125,22 +131,348 @@
         /// <param name="timeout">
         /// Timeout in seconds for long polling. Defaults to 0, i.e. usual short polling.
         /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
         /// <returns>
         /// An Array of Update objects.
         /// </returns>
-        public async Task<TelegramResult<IList<Update>>> GetUpdatesAsync(int offset = 0, int limit = 100, int timeout = 0)
+        public async Task<TelegramResult<IList<Update>>> GetUpdatesAsync(int offset = 0, int limit = 100, int timeout = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             var response = await this.Client
-                                     .GetAsync($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}")
+                                     .GetAsync($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}", cancellationToken)
                                      .ConfigureAwait(false);
 
             response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsAsync<TelegramResult<IList<Update>>>().ConfigureAwait(false);
+            return await response.Content.ReadAsAsync<TelegramResult<IList<Update>>>(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
-        /// Sends a text message. On success, the sent <see cref="Message"/> is returned.
+        /// Gets a list of profile pictures for a user.
+        /// </summary>
+        /// <param name="userId">
+        /// Unique identifier of the target user.
+        /// </param>
+        /// <param name="offset">
+        /// Sequential number of the first photo to be returned. By default, all photos are returned.
+        /// </param>
+        /// <param name="limit">
+        /// Limits the number of photos to be retrieved. Values between 1-100 are accepted. Defaults to 100.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="UserProfilePhotos"/>.
+        /// </returns>
+        public async Task<TelegramResult<UserProfilePhotos>> GetUserProfillePhotos(int userId, int offset = -1, int limit = 100, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var builder = new StringBuilder();
+            builder.AppendFormat("getUserProfilePhotos?user_id={0}&limit={1}", userId, limit);
+
+            if( offset >= 0 )
+                builder.AppendFormat("offset={0}", offset);
+
+            var response = await this.Client
+                                     .GetAsync(builder.ToString(), cancellationToken)
+                                     .ConfigureAwait(false);
+
+            response.EnsureSuccessStatusCode();
+            return await response.Content.ReadAsAsync<TelegramResult<UserProfilePhotos>>(cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Sends an audio file to be displayed as a playable voice message on Telegram clients.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="audioId">
+        /// Id of an audio file that is already on the Telegram servers.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be
+        /// sent as <see cref="Document"/>). Bots can currently send audio files of up to 50 MB in size,
+        /// this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendAudioAsync(int chatId, [NotNull] string audioId, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(audioId) )
+                throw new ArgumentNullException(nameof(audioId));
+
+            var parameters = new NameValueCollection { { "audio", audioId } };
+            return await this.CallTelegramMethodAsync("sendAudio", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends an audio file to be displayed as a playable voice message on Telegram clients.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="audioStream">
+        /// A <see cref="Stream"/> to the audio file to send. 
+        /// </param>
+        /// <param name="fileName">
+        /// A name for the file to be sent using <paramref name="audioStream"/>.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be
+        /// sent as <see cref="Document"/>). Bots can currently send audio files of up to 50 MB in size,
+        /// this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendAudioAsync(int chatId, [NotNull] Stream audioStream, string fileName, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( audioStream == null )
+                throw new ArgumentNullException(nameof(audioStream));
+
+            var content = new MultipartFormDataContent { { new StreamContent(audioStream), "audio", fileName } };
+            return await this.CallTelegramMethodAsync("sendAudio", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends an audio file to be displayed as a playable voice message on Telegram clients.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="filePath">
+        /// Fully qualified path to the audio file.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// For this to work, your audio must be in an .ogg file encoded with OPUS (other formats may be
+        /// sent as <see cref="Document"/>). Bots can currently send audio files of up to 50 MB in size,
+        /// this limit may be changed in the future.
+        /// </remarks>
+        public Task<TelegramResult<Message>> SendAudioFromFileAsync(int chatId, [NotNull] string filePath, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(filePath) )
+                throw new ArgumentNullException(nameof(filePath));
+
+            if( !File.Exists(filePath) )
+                throw new FileNotFoundException("Unable to find the audio file at the specified location.", filePath);
+
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.SendAudioAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a chat action. Use this method when you need to tell the user that something is happening on the bot's side.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="action">
+        /// Type of action to broadcast.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Use this method when you need to tell the user that something is happening on the bot's side. The status is
+        /// set for 5 seconds or less (when a message arrives from your bot, Telegram clients clear its typing status).
+        /// <example>
+        /// The <c>ImageBot</c> needs some time to process a request and upload the image. Instead of sending a
+        /// text message along the lines of "Retrieving image, please wait…", the bot may use <see cref="SendChatAction"/>
+        /// with action = upload_photo. The user will see a "sending photo" status for the bot.
+        /// </example>
+        /// </remarks>
+        public async Task<TelegramResult<bool>> SendChatAction(int chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var parameters = new NameValueCollection { { "action", action.Value } };
+            return await this.CallTelegramMethodAsync<bool>("sendChatAction", parameters, chatId, -1, null, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a general file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="documentId">
+        /// A file id as string to resend a file that is already on the Telegram servers.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendDocumentAsync(int chatId, [NotNull] string documentId, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(documentId) )
+                throw new ArgumentNullException(nameof(documentId));
+
+            var parameters = new NameValueCollection { { "document", documentId } };
+            return await this.CallTelegramMethodAsync("sendDocument", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a general file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="documentStream">
+        /// A <see cref="Stream"/> to the document file to send. 
+        /// </param>
+        /// <param name="fileName">
+        /// A name for the file to be sent using <paramref name="documentStream"/>.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendDocumentAsync(int chatId, [NotNull] Stream documentStream, string fileName, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( documentStream == null )
+                throw new ArgumentNullException(nameof(documentStream));
+
+            var content = new MultipartFormDataContent { { new StreamContent(documentStream), "document", fileName } };
+            return await this.CallTelegramMethodAsync("sendDocument", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a general file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="filePath">
+        /// Fully qualified path to the file to send.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public Task<TelegramResult<Message>> SendDocumentFromFileAsync(int chatId, [NotNull] string filePath, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(filePath) )
+                throw new ArgumentNullException(nameof(filePath));
+
+            if( !File.Exists(filePath) )
+                throw new FileNotFoundException("Unable to find the document at the specified location.", filePath);
+
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.SendDocumentAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a point on the map.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="latitude">
+        /// Latitude of location
+        /// </param>
+        /// <param name="longitude">
+        /// Longitude of location
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> SendLocationAsync(int chatId, double latitude, double longitude, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var parameters = new NameValueCollection
+                {
+                    { "latitude", latitude.ToString(CultureInfo.InvariantCulture) }, 
+                    { "longitude", longitude.ToString(CultureInfo.InvariantCulture) }
+                };
+
+            return await this.CallTelegramMethodAsync("sendLocation", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a text message.
         /// </summary>
         /// <param name="chatId">
         /// Unique identifier for the message recipient — <see cref="User"/> or <see cref="GroupChat"/> id.
@@ -158,43 +490,32 @@
         /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
         /// user.
         /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message"/>.
         /// </returns>
-        public async Task<TelegramResult<Message>> SendMessageAsync(int chatId, [NotNull] string text, bool disableWebPagePreview = false, int replyToMessageId = -1, IReply replyMarkup = null)
+        public async Task<TelegramResult<Message>> SendMessageAsync(int chatId, [NotNull] string text, bool disableWebPagePreview = false, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( text == null )
                 throw new ArgumentNullException(nameof(text));
 
-            var parameters = new NameValueCollection
-                {
-                    { "chat_id", chatId.ToString() }, 
-                    { "text", text }
-                };
+            var parameters = new NameValueCollection { { "text", text } };
 
             if( disableWebPagePreview )
                 parameters.Add("disable_web_page_preview", "true");
 
-            if( replyToMessageId >= 0 )
-                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
-
-            if( replyMarkup != null )
-                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
-
-            var content = new FormUrlEncodedContent(parameters);
-            var response = await this.Client.PostAsync("sendMessage", content).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
-
-            return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
+            return await this.CallTelegramMethodAsync("sendMessage", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
-        /// Sends a photo. On success, the sent <see cref="Message"/> is returned.
+        /// Sends a photo.
         /// </summary>
         /// <param name="chatId">
         /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
         /// </param>
-        /// <param name="photoId">
+        /// <param name="documentId">
         /// A file id as string to resend a photo that is already on the Telegram servers.
         /// </param>
         /// <param name="caption">
@@ -207,34 +528,321 @@
         /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
         /// user.
         /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message"/>.
         /// </returns>
-        public async Task<TelegramResult<Message>> SendPhotoAsync(int chatId, [NotNull] string photoId, string caption = null, int replyToMessageId = -1, IReply replyMarkup = null)
+        public async Task<TelegramResult<Message>> SendPhotoAsync(int chatId, [NotNull] string documentId, string caption = null, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if( string.IsNullOrWhiteSpace(photoId) )
-                throw new ArgumentNullException(nameof(photoId));
+            if( string.IsNullOrWhiteSpace(documentId) )
+                throw new ArgumentNullException(nameof(documentId));
 
-            var parameters = new NameValueCollection
-                {
-                    { "chat_id", chatId.ToString() }, 
-                    { "photo_id", photoId }
-                };
+            var parameters = new NameValueCollection { { "photo", documentId } };
 
             if( !string.IsNullOrWhiteSpace(caption) )
                 parameters.Add("caption", caption);
 
-            if( replyToMessageId >= 0 )
-                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
+            return await this.CallTelegramMethodAsync("sendPhoto", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
 
-            if( replyMarkup != null )
-                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
+        /// <summary>
+        /// Sends a photo.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="photoStream">
+        /// A <see cref="Stream"/> to the photo to upload.
+        /// </param>
+        /// <param name="fileName">
+        /// A name for the file to be sent using <paramref name="photoStream"/>.
+        /// </param>
+        /// <param name="caption">
+        /// Photo caption (may also be used when resending photos by file id).
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> SendPhotoAsync(int chatId, [NotNull] Stream photoStream, string fileName, string caption = null, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( photoStream == null )
+                throw new ArgumentNullException(nameof(photoStream));
 
-            var content = new FormUrlEncodedContent(parameters);
-            var response = await this.Client.PostAsync("forwardMessage", content).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            var content = new MultipartFormDataContent { { new StreamContent(photoStream), "photo", fileName } };
 
-            return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
+            if( !string.IsNullOrWhiteSpace(caption) )
+                content.Add(new StringContent(caption), "caption");
+            
+            return await this.CallTelegramMethodAsync("sendPhoto", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a photo.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="filePath">
+        /// The fully qualified path to the photo to send.
+        /// </param>
+        /// <param name="caption">
+        /// Photo caption (may also be used when resending photos by file id).
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public Task<TelegramResult<Message>> SendPhotoFromFileAsync(int chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {            
+            if( string.IsNullOrWhiteSpace(filePath) )
+                throw new ArgumentNullException(nameof(filePath));
+
+            if( !File.Exists(filePath) )
+                throw new FileNotFoundException("Unable to find the photo at the specified location.", filePath);
+
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.SendPhotoAsync(chatId, fileStream, fileName, caption, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends <c>.webp</c> sticker.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="stickerId">
+        /// A file id as string to resend a sticker that is already on the Telegram servers.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> SendStickerAsync(int chatId, [NotNull] string stickerId, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(stickerId) )
+                throw new ArgumentNullException(nameof(stickerId));
+
+            var parameters = new NameValueCollection { { "sticker", stickerId } };
+            return await this.CallTelegramMethodAsync("sendSticker", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends <c>.webp</c> sticker.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="stickerStream">
+        /// A <see cref="Stream"/> to the sticker file to send.
+        /// </param>
+        /// <param name="fileName">
+        /// A name for the file to be sent using <paramref name="stickerStream"/>.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        public async Task<TelegramResult<Message>> SendStickerAsync(int chatId, [NotNull] Stream stickerStream, string fileName, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( stickerStream == null )
+                throw new ArgumentNullException(nameof(stickerStream));
+
+            var content = new MultipartFormDataContent { { new StreamContent(stickerStream), "sticker", fileName } };
+
+            return await this.CallTelegramMethodAsync("sendSticker", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends <c>.webp</c> sticker.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="filePath">
+        /// Fully qualified path to the sticker to send.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public Task<TelegramResult<Message>> SendStickerFromFileAsync(int chatId, [NotNull] string filePath, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(filePath) )
+                throw new ArgumentNullException(nameof(filePath));
+
+            if( !File.Exists(filePath) )
+                throw new FileNotFoundException("Unable to find the sticker at the specified location.", filePath);
+
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.SendStickerAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a video file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="videoId">
+        /// A file id as string to resend a video that is already on the Telegram servers.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
+        /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] string videoId, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(videoId) )
+                throw new ArgumentNullException(nameof(videoId));
+
+            var parameters = new NameValueCollection { { "video", videoId } };
+            return await this.CallTelegramMethodAsync("sendVideo", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a video file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="videoStream">
+        /// A <see cref="Stream"/> to the video file to send.
+        /// </param>
+        /// <param name="fileName">
+        /// A name for the file to be sent using <paramref name="videoStream"/>.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
+        /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] Stream videoStream, string fileName, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( videoStream == null )
+                throw new ArgumentNullException(nameof(videoStream));
+
+            var content = new MultipartFormDataContent { { new StreamContent(videoStream), "video", fileName } };
+            return await this.CallTelegramMethodAsync("sendVideo", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        /// <summary>
+        /// Sends a video file.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
+        /// </param>
+        /// <param name="filePath">
+        /// Fully qualified path to the video file to send.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns the sent <see cref="Message"/>.
+        /// </returns>
+        /// <remarks>
+        /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        /// <remarks>
+        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
+        /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
+        /// </remarks>
+        public Task<TelegramResult<Message>> SendVideoFromFileAsync(int chatId, [NotNull] string filePath, int replyToMessageId = -1, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(filePath) )
+                throw new ArgumentNullException(nameof(filePath));
+
+            if( !File.Exists(filePath) )
+                throw new FileNotFoundException("Unable to find the video file at the specified location.", filePath);
+
+            var fileName = Path.GetFileName(filePath);
+            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return this.SendVideoAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -299,6 +907,49 @@
                 // set large fields to null.
                 this._client = null;
                 this._disposedValue = true;
+            }
+        }
+
+        private Task<TelegramResult<Message>> CallTelegramMethodAsync(string uri, NameValueCollection parameters, int chatId, int replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        {
+            return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+        }
+
+        private async Task<TelegramResult<T>> CallTelegramMethodAsync<T>(string uri, NameValueCollection parameters, int chatId, int replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        {
+            parameters.Add("chat_id", chatId.ToString());
+
+            if( replyToMessageId >= 0 )
+                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
+
+            if( replyMarkup != null )
+                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
+
+            using( var content = new FormUrlEncodedContent(parameters) )
+            {
+                var response = await this.Client.PostAsync(uri, content, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadAsAsync<TelegramResult<T>>(cancellationToken).ConfigureAwait(false);
+            }
+        }
+
+        private async Task<TelegramResult<Message>> CallTelegramMethodAsync([NotNull] string url, MultipartFormDataContent content, int chatId, int replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        {
+            using( content )
+            {
+                content.Add(new StringContent(chatId.ToString()), "chat_id");
+
+                if( replyToMessageId >= 0 )
+                    content.Add(new StringContent(replyToMessageId.ToString()), "reply_to_message_id");
+
+                if( replyMarkup != null )
+                    content.Add(new StringContent(JsonConvert.SerializeObject(replyMarkup)), "reply_markup");
+
+                var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
+                response.EnsureSuccessStatusCode();
+
+                return await response.Content.ReadAsAsync<TelegramResult<Message>>(cancellationToken).ConfigureAwait(false);
             }
         }
 

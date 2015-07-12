@@ -1,9 +1,9 @@
 ﻿{
   "title": "Telebot",
-  "version": "1.0.0-beta-1570",
+  "version": "1.0.0",
   "description": "Telegram Bot API client library for .NET.",
   "authors": [ "Mohammadreza Taikandi" ],
-  "tags": [ "" ],
+  "tags": [ "telegram", "telegram bot" ],
   "projectUrl": "https://github.com/mrtaikandi/Telebot",
   "licenseUrl": "https://github.com/mrtaikandi/Telebot/blob/master/LICENSE",
 
@@ -13,6 +13,9 @@
   },
 
   "frameworks": {
+    "net45": { },
+    "net451": { },
+    "net452": { },
     "dnx451": { },
     "dnxcore50": {
       "dependencies": {

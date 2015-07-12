@@ -14,13 +14,13 @@
         /// Gets or sets th latitude as defined by sender
         /// </summary>
         [JsonProperty("latitude", Required = Required.Always)]
-        public float Latitude { get; set; }
+        public double Latitude { get; set; }
 
         /// <summary>
         /// Gets or sets the longitude as defined by sender
         /// </summary>
         [JsonProperty("longitude", Required = Required.Always)]
-        public float Longitude { get; set; }
+        public double Longitude { get; set; }
 
         #endregion
     }

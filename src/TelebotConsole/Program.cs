@@ -64,7 +64,10 @@
                         this._offset = update.Result.Max(u => u.Id) + 1;
                         this.Configuration.Set("UpdateOffset", this._offset.ToString());
 
-                        await this.EchoAllAsync(update.Result);
+                        foreach( var result in update.Result )
+                        {
+                            await this.CheckMessages(result);
+                        }
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(1));
@@ -79,14 +82,6 @@
             Console.Read();
         }
 
-        private static void LogException(Exception ex)
-        {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(ex);
-
-            Console.ResetColor();
-        }
-
         #endregion
 
         #region Methods
@@ -95,6 +90,36 @@
         {
             var serializedResult = JsonConvert.SerializeObject(result, Formatting.Indented);
             Console.Write(serializedResult);
+        }
+
+        private static void LogException(Exception ex)
+        {
+            Console.ForegroundColor = ConsoleColor.Red;
+            Console.WriteLine(ex);
+
+            Console.ResetColor();
+        }
+
+        private Task CheckMessages(Update update)
+        {
+            if( string.IsNullOrWhiteSpace(update.Message.Text) )
+                return Task.FromResult(0);
+
+            var message = update.Message.Text.ToLowerInvariant();
+            switch( message )
+            {
+                case "/sendphoto":
+                    return this.SendPhoto(update);
+                case "/chataction":
+                    return this.SendChatAction(update);
+                default:
+                    return this.EchoAsync(update);
+            }
+        }
+
+        private Task SendChatAction(Update update)
+        {
+            return this._telebot.SendChatAction(update.Message.Chat.Id, ChatAction.Typing);
         }
 
         private async Task EchoAllAsync(IEnumerable<Update> updates)
@@ -112,6 +137,14 @@
 
             var message = update.Message;
             await this._telebot.SendMessageAsync(message.Chat.Id, message.Text);
+        }
+
+        private Task SendPhoto(Update update)
+        {
+            var actionTask = this._telebot.SendChatAction(update.Message.Chat.Id, ChatAction.UploadPhoto);
+            var sendTask = this._telebot.SendPhotoFromFileAsync(update.Message.Chat.Id, @"D:\Temp\brekeke-frog-symbol.jpg", "The Frog!");
+
+            return Task.WhenAll(actionTask, sendTask);
         }
 
         #endregion
