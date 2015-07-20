@@ -122,6 +122,12 @@
       "Microsoft.Bcl/1.1.9": {
         "dependencies": {
           "Microsoft.Bcl.Build": "1.0.14"
+        },
+        "compile": {
+          "lib/portable-net45+win8+wp8+wpa81/_._": {}
+        },
+        "runtime": {
+          "lib/portable-net45+win8+wp8+wpa81/_._": {}
         }
       },
       "Microsoft.Bcl.Build/1.0.14": {},
@@ -586,11 +592,17 @@
           "System.Threading.Tasks": "4.0.0-beta-23019",
           "System.Threading.ThreadPool": "4.0.10-beta-23019"
         },
+        "compile": {
+          "ref/dnxcore50/_._": {}
+        },
         "runtime": {
           "lib/DNXCore50/System.Private.Networking.dll": {}
         }
       },
       "System.Private.Uri/4.0.0-beta-23019": {
+        "compile": {
+          "ref/dnxcore50/_._": {}
+        },
         "runtime": {
           "lib/DNXCore50/System.Private.Uri.dll": {}
         }

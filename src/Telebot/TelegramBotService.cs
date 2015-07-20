@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
+    using System.Net;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -95,7 +96,7 @@
 
             var content = new FormUrlEncodedContent(parameters);
             var response = await this.Client.PostAsync("forwardMessage", content).ConfigureAwait(false);
-            response.EnsureSuccessStatusCode();
+            EnsureSuccessStatusCode(response);
 
             return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
         }
@@ -108,8 +109,7 @@
         public async Task<TelegramResult<User>> GetMeAsync()
         {
             var response = await this.Client.GetAsync("getMe").ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
+            EnsureSuccessStatusCode(response);
             return await response.Content.ReadAsAsync<TelegramResult<User>>().ConfigureAwait(false);
         }
 
@@ -143,7 +143,7 @@
                                      .GetAsync($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}", cancellationToken)
                                      .ConfigureAwait(false);
 
-            response.EnsureSuccessStatusCode();
+            EnsureSuccessStatusCode(response);
             return await response.Content.ReadAsAsync<TelegramResult<IList<Update>>>(cancellationToken).ConfigureAwait(false);
         }
 
@@ -177,7 +177,7 @@
                                      .GetAsync(builder.ToString(), cancellationToken)
                                      .ConfigureAwait(false);
 
-            response.EnsureSuccessStatusCode();
+            EnsureSuccessStatusCode(response);
             return await response.Content.ReadAsAsync<TelegramResult<UserProfilePhotos>>(cancellationToken).ConfigureAwait(false);
         }
 
@@ -224,7 +224,7 @@
         /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
         /// </param>
         /// <param name="audioStream">
-        /// A <see cref="Stream"/> to the audio file to send. 
+        /// A <see cref="Stream"/> to the audio file to send.
         /// </param>
         /// <param name="fileName">
         /// A name for the file to be sent using <paramref name="audioStream"/>.
@@ -367,7 +367,7 @@
         /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
         /// </param>
         /// <param name="documentStream">
-        /// A <see cref="Stream"/> to the document file to send. 
+        /// A <see cref="Stream"/> to the document file to send.
         /// </param>
         /// <param name="fileName">
         /// A name for the file to be sent using <paramref name="documentStream"/>.
@@ -510,21 +510,27 @@
         }
 
         /// <summary>
-        /// Sends a text message and requests to hide the current custom keyboard by default. 
+        /// Sends a text message and requests to hide the current custom keyboard by default.
         /// Optionally if the message is a reply, ID of the original message will be sent.
         /// </summary>
-        /// <param name="message">The original received message.</param>
-        /// <param name="text">Text of the message to be sent.</param>
+        /// <param name="message">
+        /// The original received message.
+        /// </param>
+        /// <param name="text">
+        /// Text of the message to be sent.
+        /// </param>
         /// <param name="disableWebPagePreview">
         /// if set to <c>true</c> disables link previews for links in this message.
         /// </param>
         /// <param name="replyMarkup">
-        /// Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, 
+        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard,
         /// instructions to hide keyboard or to force a reply from the user. Defaults to hide the current custom keyboard.
         /// </param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
         /// <returns>
-        /// On success, returns the sent <see cref="Message" />.
+        /// On success, returns the sent <see cref="Message"/>.
         /// </returns>
         public Task<TelegramResult<Message>> SendMessageAsync(Message message, [NotNull] string text, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -606,7 +612,7 @@
 
             if( !string.IsNullOrWhiteSpace(caption) )
                 content.Add(new StringContent(caption), "caption");
-            
+
             return await this.CallTelegramMethodAsync("sendPhoto", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -636,7 +642,7 @@
         /// On success, returns the sent <see cref="Message"/>.
         /// </returns>
         public Task<TelegramResult<Message>> SendPhotoFromFileAsync(int chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
-        {            
+        {
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -932,6 +938,17 @@
             }
         }
 
+        private static void EnsureSuccessStatusCode(HttpResponseMessage response)
+        {
+            if( !response.IsSuccessStatusCode )
+            {
+                if( response.StatusCode == HttpStatusCode.BadGateway )
+                    throw new ServiceUnavailableException();
+
+                response.EnsureSuccessStatusCode();
+            }
+        }
+
         private Task<TelegramResult<Message>> CallTelegramMethodAsync(string uri, NameValueCollection parameters, int chatId, int replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
         {
             return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
@@ -950,7 +967,7 @@
             using( var content = new FormUrlEncodedContent(parameters) )
             {
                 var response = await this.Client.PostAsync(uri, content, cancellationToken).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
+                EnsureSuccessStatusCode(response);
 
                 return await response.Content.ReadAsAsync<TelegramResult<T>>(cancellationToken).ConfigureAwait(false);
             }
@@ -969,7 +986,7 @@
                     content.Add(new StringContent(JsonConvert.SerializeObject(replyMarkup)), "reply_markup");
 
                 var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
-                response.EnsureSuccessStatusCode();
+                EnsureSuccessStatusCode(response);
 
                 return await response.Content.ReadAsAsync<TelegramResult<Message>>(cancellationToken).ConfigureAwait(false);
             }
