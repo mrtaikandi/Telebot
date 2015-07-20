@@ -2023,7 +2023,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Telebot >= 1.0.0-*",
+      "Telebot >= 1.0.1",
       "Newtonsoft.Json >= 7.0.1",
       "Microsoft.Framework.Runtime.Abstractions >= 1.0.0-beta*",
       "Microsoft.Framework.Configuration >= 1.0.0-beta*",

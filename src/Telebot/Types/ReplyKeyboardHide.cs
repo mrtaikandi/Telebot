@@ -12,6 +12,25 @@
     [JsonObject(MemberSerialization.OptIn)]
     public class ReplyKeyboardHide : IReply
     {
+        #region Constructors and Destructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ReplyKeyboardHide"/> class.
+        /// </summary>
+        /// <param name="hideKeyboard">
+        /// if set to <c>true</c> requests clients to hide the custom keyboard. Defaults to <c>true</c>.
+        /// </param>
+        /// <param name="selective">
+        /// if set to <c>true</c> hides custom keyboard for specific users only. Defaults to <c>true</c>.
+        /// </param>
+        public ReplyKeyboardHide(bool hideKeyboard = true, bool selective = true)
+        {
+            this.HideKeyboard = hideKeyboard;
+            this.Selective = selective;
+        }
+
+        #endregion
+
         #region Public Properties
 
         /// <summary>

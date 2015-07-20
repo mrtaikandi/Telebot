@@ -1,6 +1,6 @@
 {
   "userSecretsId": "aspnet5-TelebotConsole-20150706122634",
-  "version": "1.0.0-*",
+  "version": "1.0.1",
   "description": "Test console for Telebot library.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "" ],
@@ -8,7 +8,7 @@
   "licenseUrl": "",
 
   "dependencies": {
-    "Telebot": "1.0.0-*",
+    "Telebot": "1.0.1",
     "Newtonsoft.Json": "7.0.1",    
     "Microsoft.Framework.Runtime.Abstractions": "1.0.0-beta*",
     "Microsoft.Framework.Configuration": "1.0.0-beta*",

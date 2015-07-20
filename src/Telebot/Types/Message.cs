@@ -93,7 +93,7 @@
         /// Gets or sets the unique message identifier
         /// </summary>
         [JsonProperty("message_id", Required = Required.Always)]
-        public string MessageId { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the information about the new member (which might be a bo itself) added to the group (Optional).
