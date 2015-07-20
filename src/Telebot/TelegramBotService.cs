@@ -534,7 +534,7 @@
         /// </returns>
         public Task<TelegramResult<Message>> SendMessageAsync(Message message, [NotNull] string text, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.SendMessageAsync(message.Chat.Id, text, disableWebPagePreview, message.ReplyToMessage.Id, new ReplyKeyboardHide(), cancellationToken);
+            return this.SendMessageAsync(message.Chat.Id, text, disableWebPagePreview, message.ReplyToMessage?.Id ?? 0, new ReplyKeyboardHide(), cancellationToken);
         }
 
         /// <summary>
