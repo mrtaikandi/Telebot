@@ -31,7 +31,7 @@
         /// <summary>
         /// Gets or sets the sticker thumbnail in .webp or .jpg format.
         /// </summary>
-        [JsonProperty("thumb", Required = Required.Always)]
+        [JsonProperty("thumb")]
         public PhotoSize Thumb { get; set; }
 
         /// <summary>

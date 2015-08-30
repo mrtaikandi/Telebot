@@ -49,7 +49,7 @@
         /// <summary>
         /// Gets or sets the video thumbnail.
         /// </summary>
-        [JsonProperty("thumb", Required = Required.Always)]
+        [JsonProperty("thumb")]
         public PhotoSize Thumb { get; set; }
 
         /// <summary>

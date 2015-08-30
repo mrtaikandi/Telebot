@@ -37,7 +37,7 @@
         /// <summary>
         /// Gets or sets the document thumbnail as defined by sender.
         /// </summary>
-        [JsonProperty("thumb", Required = Required.Always)]
+        [JsonProperty("thumb")]
         public PhotoSize Thumb { get; set; }
 
         #endregion

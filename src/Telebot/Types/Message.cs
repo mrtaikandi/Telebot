@@ -47,7 +47,7 @@
         public bool DeleteChatPhoto { get; set; }
 
         /// <summary>
-        /// Gets or sets the information about th efile if the message is a general file (Optional).
+        /// Gets or sets the information about the file if the message is a general file (Optional).
         /// </summary>
         [JsonProperty("document")]
         public Document Document { get; set; }
@@ -102,7 +102,7 @@
         public User NewChatParticipant { get; set; }
 
         /// <summary>
-        /// Gets or sets the grouop new photo (Optional).
+        /// Gets or sets the group new photo (Optional).
         /// </summary>
         [JsonProperty("new_chat_photo")]
         public IList<PhotoSize> NewChatPhoto { get; set; }
@@ -136,7 +136,7 @@
         public Sticker Sticker { get; set; }
 
         /// <summary>
-        /// Gets or sets the the actual UTF-8 text of the message for the text messages (Optional).
+        /// Gets or sets the actual UTF-8 text of the message for the text messages (Optional).
         /// </summary>
         [JsonProperty("text")]
         public string Text { get; set; }
@@ -147,6 +147,11 @@
         [JsonProperty("video")]
         public Video Video { get; set; }
 
+        /// <summary>
+        /// Gets or sets the caption of the photo or video.
+        /// </summary>
+        [JsonProperty("caption")]
+        public string Caption { get; set; }
         #endregion
     }
 }

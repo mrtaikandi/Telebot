@@ -89,8 +89,8 @@
         {
             var parameters = new NameValueCollection
                 {
-                    { "chat_id", chatId.ToString() }, 
-                    { "from_chat_id", fromChatId.ToString() }, 
+                    { "chat_id", chatId.ToString() },
+                    { "from_chat_id", fromChatId.ToString() },
                     { "message_id", messageId.ToString() }
                 };
 
@@ -464,7 +464,7 @@
         {
             var parameters = new NameValueCollection
                 {
-                    { "latitude", latitude.ToString(CultureInfo.InvariantCulture) }, 
+                    { "latitude", latitude.ToString(CultureInfo.InvariantCulture) },
                     { "longitude", longitude.ToString(CultureInfo.InvariantCulture) }
                 };
 
@@ -761,106 +761,88 @@
         /// <summary>
         /// Sends a video file.
         /// </summary>
-        /// <param name="chatId">
-        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
-        /// </param>
-        /// <param name="videoId">
-        /// A file id as string to resend a video that is already on the Telegram servers.
-        /// </param>
-        /// <param name="replyToMessageId">
-        /// If the message is a reply, ID of the original message.
-        /// </param>
-        /// <param name="replyMarkup">
-        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
-        /// user.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
-        /// </param>
+        /// <param name="chatId">Unique identifier for the message recipient, <see cref="User" /> or <see cref="GroupChat" /> id.</param>
+        /// <param name="videoId">A file id as string to resend a video that is already on the Telegram servers.</param>
+        /// <param name="duration">Duration of sent video in seconds.</param>
+        /// <param name="caption">Video caption.</param>
+        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
+        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>
-        /// On success, returns the sent <see cref="Message"/>.
+        /// On success, returns the sent <see cref="Message" />.
         /// </returns>
         /// <remarks>
-        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
+        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />).
         /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] string videoId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] string videoId, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( string.IsNullOrWhiteSpace(videoId) )
                 throw new ArgumentNullException(nameof(videoId));
 
             var parameters = new NameValueCollection { { "video", videoId } };
+            if( duration > 0 )
+                parameters.Add("duration", duration.ToString());
+
+            if( caption != null )
+                parameters.Add("caption", caption);
+
             return await this.CallTelegramMethodAsync("sendVideo", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
         /// Sends a video file.
         /// </summary>
-        /// <param name="chatId">
-        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
-        /// </param>
-        /// <param name="videoStream">
-        /// A <see cref="Stream"/> to the video file to send.
-        /// </param>
-        /// <param name="fileName">
-        /// A name for the file to be sent using <paramref name="videoStream"/>.
-        /// </param>
-        /// <param name="replyToMessageId">
-        /// If the message is a reply, ID of the original message.
-        /// </param>
-        /// <param name="replyMarkup">
-        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
-        /// user.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
-        /// </param>
+        /// <param name="chatId">Unique identifier for the message recipient, <see cref="User" /> or <see cref="GroupChat" /> id.</param>
+        /// <param name="videoStream">A <see cref="Stream" /> to the video file to send.</param>
+        /// <param name="fileName">A name for the file to be sent using <paramref name="videoStream" />.</param>
+        /// <param name="duration">Duration of sent video in seconds.</param>
+        /// <param name="caption">Video caption.</param>
+        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
+        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>
-        /// On success, returns the sent <see cref="Message"/>.
+        /// On success, returns the sent <see cref="Message" />.
         /// </returns>
         /// <remarks>
-        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
+        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />).
         /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] Stream videoStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TelegramResult<Message>> SendVideoAsync(int chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( videoStream == null )
                 throw new ArgumentNullException(nameof(videoStream));
 
             var content = new MultipartFormDataContent { { new StreamContent(videoStream), "video", fileName } };
+            if( duration > 0 )
+                content.Add(new StringContent(duration.ToString()), "duration");
+
+            if( caption != null )
+                content.Add(new StringContent(caption), "caption");
+
             return await this.CallTelegramMethodAsync("sendVideo", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
         /// Sends a video file.
         /// </summary>
-        /// <param name="chatId">
-        /// Unique identifier for the message recipient, <see cref="User"/> or <see cref="GroupChat"/> id.
-        /// </param>
-        /// <param name="filePath">
-        /// Fully qualified path to the video file to send.
-        /// </param>
-        /// <param name="replyToMessageId">
-        /// If the message is a reply, ID of the original message.
-        /// </param>
-        /// <param name="replyMarkup">
-        /// Additional interface options. An <see cref="IReply"/> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
-        /// user.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
-        /// </param>
+        /// <param name="chatId">Unique identifier for the message recipient, <see cref="User" /> or <see cref="GroupChat" /> id.</param>
+        /// <param name="filePath">Fully qualified path to the video file to send.</param>
+        /// <param name="duration">Duration of sent video in seconds.</param>
+        /// <param name="caption">Video caption.</param>
+        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
+        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide keyboard or to force a reply from the
+        /// user.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>
-        /// On success, returns the sent <see cref="Message"/>.
+        /// On success, returns the sent <see cref="Message" />.
         /// </returns>
         /// <remarks>
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        /// <remarks>
-        /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document"/>).
-        /// Bots can currently send video files of up to 50 MB in size, this limit may be changed in the future.
-        /// </remarks>
-        public Task<TelegramResult<Message>> SendVideoFromFileAsync(int chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TelegramResult<Message>> SendVideoFromFileAsync(int chatId, [NotNull] string filePath, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
@@ -870,7 +852,7 @@
 
             var fileName = Path.GetFileName(filePath);
             var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return this.SendVideoAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendVideoAsync(chatId, fileStream, fileName, duration, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -889,7 +871,7 @@
         /// <para>
         /// If you'd like to make sure that the Webhook request comes from Telegram, we recommend using
         /// a secret path in the URL, e.g. <c>www.example.com/YOUR_TOKEN</c>. Since nobody else knows your
-        /// bot‘s token, you can be pretty sure it’s us.
+        /// bot's token, you can be pretty sure it’s us.
         /// </para>
         /// </remarks>
         public async Task SetWebhookAsync(string url)
@@ -908,9 +890,9 @@
         protected virtual HttpClient CreateHttpClient()
         {
             var client = new HttpClient
-                {
-                    BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
-                };
+            {
+                BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
+            };
 
             return client;
         }

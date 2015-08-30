@@ -32,7 +32,7 @@
         /// Gets or sets the contact's user identifier in Telegram (Optional).
         /// </summary>
         [JsonProperty("user_id")]
-        public string UserId { get; set; }
+        public int UserId { get; set; }
 
         #endregion
     }
