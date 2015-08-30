@@ -1057,22 +1057,60 @@
         /// <param name="url">
         /// HTTPS url to send updates to. Use an empty string to remove webhook integration
         /// </param>
-        /// <returns>
-        /// Continues task.
-        /// </returns>
+        /// <param name="certificatePath">
+        /// The fully qualified path to the certificate path so that the root certificate in use can be checked.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
         /// <remarks>
-        /// Whenever there is an update for the bot, we will send an HTTPS POST request to the specified url,
+        /// Whenever there is an update for the bot, Telegram will send an HTTPS POST request to the specified url,
         /// containing a JSON-serialized <see cref="Update" />. In case of an unsuccessful request,
-        /// we will give up after a reasonable amount of attempts.
+        /// it will give up after a reasonable amount of attempts.
         /// <para>
         /// If you'd like to make sure that the Webhook request comes from Telegram, we recommend using
         /// a secret path in the URL, e.g. <c>www.example.com/YOUR_TOKEN</c>. Since nobody else knows your
-        /// bot's token, you can be pretty sure it’s us.
+        /// bot's token, you can be pretty sure it’s Telegram.
         /// </para>
+        /// <list type="bullet">
+        ///     <item>
+        ///         <description>
+        /// You will not be able to receive updates using <see cref="GetUpdatesAsync" /> for as long as an outgoing webhook is set
+        /// up.
+        ///         </description>
+        ///     </item><item>
+        ///         <description>
+        /// To use a self-signed certificate, you need to upload your public key certificate using
+        /// <paramref name="certificatePath" /> parameter.
+        ///         </description>
+        ///     </item><item>
+        ///         <description>
+        /// Ports currently supported for Webhooks: 443, 80, 88, 8443.
+        ///         </description>
+        ///     </item>
+        /// </list>
         /// </remarks>
-        public async Task SetWebhookAsync(string url)
+        public async Task SetWebhookAsync(string url, string certificatePath = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            await this.Client.PostAsync(url, null).ConfigureAwait(false);
+            if( string.IsNullOrWhiteSpace(certificatePath) )
+                await this.Client.PostAsync(url, null, cancellationToken).ConfigureAwait(false);
+            else
+            {
+                if( !File.Exists(certificatePath) )
+                    throw new FileNotFoundException("Unable to find the certificate file at the specified location.", certificatePath);
+
+                using( var content = new MultipartFormDataContent() )
+                {
+                    var fileName = Path.GetFileName(certificatePath);
+                    var fileStream = File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    content.Add(new StreamContent(fileStream), "certificate", fileName);
+                    content.Add(new StringContent(url), "url");
+
+                    var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
+                    EnsureSuccessStatusCode(response);
+                }
+            }
         }
 
         #endregion
