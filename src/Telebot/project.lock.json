@@ -74,6 +74,30 @@
         }
       }
     },
+    ".NETFramework,Version=v4.6": {
+      "Microsoft.AspNet.WebApi.Client/5.2.3": {
+        "dependencies": {
+          "Newtonsoft.Json": "6.0.4"
+        },
+        "frameworkAssemblies": [
+          "System.Net.Http"
+        ],
+        "compile": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        },
+        "runtime": {
+          "lib/net45/System.Net.Http.Formatting.dll": {}
+        }
+      },
+      "Newtonsoft.Json/7.0.1": {
+        "compile": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Newtonsoft.Json.dll": {}
+        }
+      }
+    },
     "DNX,Version=v4.5.1": {
       "Microsoft.AspNet.WebApi.Client/5.2.3": {
         "dependencies": {
@@ -1993,6 +2017,7 @@
     ".NETFramework,Version=v4.5": [],
     ".NETFramework,Version=v4.5.1": [],
     ".NETFramework,Version=v4.5.2": [],
+    ".NETFramework,Version=v4.6": [],
     "DNX,Version=v4.5.1": [],
     "DNX,Version=v4.5.2": [],
     "DNXCore,Version=v5.0": [
