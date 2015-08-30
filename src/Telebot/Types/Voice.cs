@@ -3,10 +3,10 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// This object represents an audio file (voice note).
+    /// This object represents a voice note.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public class Audio
+    public class Voice
     {
         #region Public Properties
 
@@ -34,17 +34,6 @@
         [JsonProperty("mime_type")]
         public string MimeType { get; set; }
 
-        /// <summary>
-        /// Gets or sets the performer of the audio as defined by sender or by audio tags (Optional).
-        /// </summary>
-        [JsonProperty("performer")]
-        public string Performer { get; set; }
-
-        /// <summary>
-        /// Gets or sets the title of the audio as defined by sender or by audio tags (Optional).
-        /// </summary>
-        [JsonProperty("title")]
-        public string Title { get; set; }
         #endregion
     }
 }

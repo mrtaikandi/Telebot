@@ -3,9 +3,9 @@
     using System;
     using System.Collections.Generic;
 
-    using Converters;
-
     using Newtonsoft.Json;
+
+    using Taikandi.Telebot.Converters;
 
     /// <summary>
     /// This object represents a message.
@@ -21,7 +21,14 @@
         public Audio Audio { get; set; }
 
         /// <summary>
-        /// Gets or sets the conversation the message belongs to. <see cref="User" /> in case of a private message, <see cref="GroupChat" /> in case of a group.
+        /// Gets or sets the caption of the photo or video.
+        /// </summary>
+        [JsonProperty("caption")]
+        public string Caption { get; set; }
+
+        /// <summary>
+        /// Gets or sets the conversation the message belongs to. <see cref="User" /> in case of a private message,
+        /// <see cref="GroupChat" /> in case of a group.
         /// </summary>
         [JsonProperty("chat", Required = Required.Always)]
         [JsonConverter(typeof(ConversationConverter))]
@@ -78,6 +85,12 @@
         public bool GroupChatCreated { get; set; }
 
         /// <summary>
+        /// Gets or sets the unique message identifier
+        /// </summary>
+        [JsonProperty("message_id", Required = Required.Always)]
+        public int Id { get; set; }
+
+        /// <summary>
         /// Gets or sets the information about the member (which might be a bo itself) removed from the group (Optional).
         /// </summary>
         [JsonProperty("left_chat_participant")]
@@ -88,12 +101,6 @@
         /// </summary>
         [JsonProperty("location")]
         public Location Location { get; set; }
-
-        /// <summary>
-        /// Gets or sets the unique message identifier
-        /// </summary>
-        [JsonProperty("message_id", Required = Required.Always)]
-        public int Id { get; set; }
 
         /// <summary>
         /// Gets or sets the information about the new member (which might be a bo itself) added to the group (Optional).
@@ -148,10 +155,11 @@
         public Video Video { get; set; }
 
         /// <summary>
-        /// Gets or sets the caption of the photo or video.
+        /// Gets or sets the information about the file if the message is a voice message (Optional).
         /// </summary>
-        [JsonProperty("caption")]
-        public string Caption { get; set; }
+        [JsonProperty("voice")]
+        public Voice Voice { get; set; }
+
         #endregion
     }
 }
