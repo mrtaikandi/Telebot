@@ -508,30 +508,19 @@
         /// <summary>
         /// Sends a text message.
         /// </summary>
-        /// <param name="chatId">
-        /// Unique identifier for the message recipient — <see cref="User" /> or <see cref="GroupChat" /> id.
-        /// </param>
-        /// <param name="text">
-        /// Text of the message to be sent.
-        /// </param>
-        /// <param name="disableWebPagePreview">
-        /// if set to <c>true</c> disables link previews for links in this message.
-        /// </param>
-        /// <param name="replyToMessageId">
-        /// If the message is a reply, ID of the original message.
-        /// </param>
-        /// <param name="replyMarkup">
-        /// Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide
+        /// <param name="chatId">Unique identifier for the message recipient — <see cref="User" /> or <see cref="GroupChat" /> id.</param>
+        /// <param name="text">Text of the message to be sent.</param>
+        /// <param name="parseMode">Indicates the way that the Telegram should parse the sent message.</param>
+        /// <param name="disableWebPagePreview">if set to <c>true</c> disables link previews for links in this message.</param>
+        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
+        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide
         /// keyboard or to force a reply from the
-        /// user.
-        /// </param>
-        /// <param name="cancellationToken">
-        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
-        /// </param>
+        /// user.</param>
+        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResult<Message>> SendMessageAsync(int chatId, [NotNull] string text, bool disableWebPagePreview = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<TelegramResult<Message>> SendMessageAsync(int chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( text == null )
                 throw new ArgumentNullException(nameof(text));
@@ -540,6 +529,9 @@
 
             if( disableWebPagePreview )
                 parameters.Add("disable_web_page_preview", "true");
+
+            if( parseMode != null && parseMode != ParseMode.Normal )
+                parameters.Add("parse_mode", parseMode.Value);
 
             return await this.CallTelegramMethodAsync("sendMessage", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -554,6 +546,7 @@
         /// <param name="text">
         /// Text of the message to be sent.
         /// </param>
+        /// <param name="parseMode">Indicates the way that the Telegram should parse the sent message.</param>
         /// <param name="disableWebPagePreview">
         /// if set to <c>true</c> disables link previews for links in this message.
         /// </param>
@@ -567,9 +560,9 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResult<Message>> SendMessageAsync(Message message, [NotNull] string text, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<TelegramResult<Message>> SendMessageAsync(Message message, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.SendMessageAsync(message.Chat.Id, text, disableWebPagePreview, message.ReplyToMessage?.Id ?? 0, replyMarkup ?? new ReplyKeyboardHide(), cancellationToken);
+            return this.SendMessageAsync(message.Chat.Id, text, parseMode, disableWebPagePreview, message.ReplyToMessage?.Id ?? 0, replyMarkup ?? new ReplyKeyboardHide(), cancellationToken);
         }
 
         /// <summary>
