@@ -1,12 +1,12 @@
 ﻿{
   "title": "Telebot",
-  "version": "1.1.9",
+  "version": "1.1.10",
   "description": "Telegram Bot API client library for .NET.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "telegram", "telegram bot" ],
   "projectUrl": "https://github.com/mrtaikandi/Telebot",
   "licenseUrl": "https://github.com/mrtaikandi/Telebot/blob/master/LICENSE",
-
+  
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
     "Microsoft.AspNet.WebApi.Client": "5.2.3"

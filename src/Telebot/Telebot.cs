@@ -16,6 +16,8 @@
 
     using Taikandi.Telebot.Types;
 
+    using File = Taikandi.Telebot.Types.File;
+
     public class Telebot : IDisposable
     {
         #region Fields
@@ -71,6 +73,43 @@
         }
 
         /// <summary>
+        /// Downloads the file requested by the <see cref="GetFile(string, CancellationToken)" /> method.
+        /// </summary>
+        /// <param name="file">
+        /// The file info received by calling <see cref="GetFile(string, CancellationToken)" />.
+        /// </param>
+        /// <param name="fullPath">
+        /// The full directory and file name to the location where the downloaded file should be saved.
+        /// </param>
+        /// <param name="overwrite">
+        /// If set to <c>true</c> overwrites the file that exists in the <paramref name="fullPath" /> path.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task DownloadFile([NotNull] File file, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( file == null )
+                throw new ArgumentNullException(nameof(file));
+
+            if( string.IsNullOrWhiteSpace(fullPath) )
+                throw new ArgumentNullException(nameof(fullPath));
+
+            if( System.IO.File.Exists(fullPath) && !overwrite )
+                throw new InvalidOperationException($"File \"{fullPath}\" already exists.");
+
+            var url = file.GetDownloadUrl(this.ApiKey);
+            using( var response = await this.Client.GetStreamAsync(url) )
+            {
+                using( var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None) )
+                {
+                    await response.CopyToAsync(fileStream, 81920, cancellationToken);
+                }
+            }
+        }
+
+        /// <summary>
         /// Forwards message of any kind.
         /// </summary>
         /// <param name="chatId">
@@ -99,6 +138,50 @@
             EnsureSuccessStatusCode(response);
 
             return await response.Content.ReadAsAsync<TelegramResult<Message>>().ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// Downloads the file with the specified <paramref name="fileId" />.
+        /// </summary>
+        /// <param name="fileId">The file identifier.</param>
+        /// <param name="fullPath">
+        /// The full directory and file name to the location where the downloaded file should be saved.
+        /// </param>
+        /// <param name="overwrite">
+        /// If set to <c>true</c> overwrites the file that exists in the <paramref name="fullPath" /> path.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>A task that represents the asynchronous operation.</returns>
+        public async Task GetFile([NotNull] string fileId, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var file = await this.GetFile(fileId, cancellationToken);
+            await this.DownloadFile(file.Result, fullPath, overwrite, cancellationToken);
+        }
+
+        /// <summary>
+        /// Returns basic info about a file and prepare it for downloading. For the moment, bots can download files of up to 20MB
+        /// in size.
+        /// </summary>
+        /// <param name="fileId">The file identifier.</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, a <see cref="Types.File" /> object containing basic info about the file to download.
+        /// </returns>
+        public async Task<TelegramResult<File>> GetFile([NotNull] string fileId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( string.IsNullOrWhiteSpace(fileId) )
+                throw new ArgumentNullException(nameof(fileId));
+
+            var response = await this.Client
+                                     .GetAsync($"getFile?file_id={fileId}", cancellationToken)
+                                     .ConfigureAwait(false);
+
+            EnsureSuccessStatusCode(response);
+            return await response.Content.ReadAsAsync<TelegramResult<File>>(cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -318,11 +401,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the audio file at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendAudioAsync(chatId, fileStream, fileName, duration, performer, title, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -460,11 +543,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the document at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendDocumentAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -508,15 +591,27 @@
         /// <summary>
         /// Sends a text message.
         /// </summary>
-        /// <param name="chatId">Unique identifier for the message recipient — <see cref="User" /> or <see cref="GroupChat" /> id.</param>
+        /// <param name="chatId">
+        /// Unique identifier for the message recipient — <see cref="User" /> or <see cref="GroupChat" /> id.
+        /// </param>
         /// <param name="text">Text of the message to be sent.</param>
-        /// <param name="parseMode">Indicates the way that the Telegram should parse the sent message.</param>
-        /// <param name="disableWebPagePreview">if set to <c>true</c> disables link previews for links in this message.</param>
-        /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
-        /// <param name="replyMarkup">Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide
+        /// <param name="parseMode">
+        /// Indicates the way that the Telegram should parse the sent message.
+        /// </param>
+        /// <param name="disableWebPagePreview">
+        /// if set to <c>true</c> disables link previews for links in this message.
+        /// </param>
+        /// <param name="replyToMessageId">
+        /// If the message is a reply, ID of the original message.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// Additional interface options. An <see cref="IReply" /> object for a custom reply keyboard, instructions to hide
         /// keyboard or to force a reply from the
-        /// user.</param>
-        /// <param name="cancellationToken">A cancellation token that can be used by other objects or threads to receive notice of cancellation.</param>
+        /// user.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
@@ -546,7 +641,9 @@
         /// <param name="text">
         /// Text of the message to be sent.
         /// </param>
-        /// <param name="parseMode">Indicates the way that the Telegram should parse the sent message.</param>
+        /// <param name="parseMode">
+        /// Indicates the way that the Telegram should parse the sent message.
+        /// </param>
         /// <param name="disableWebPagePreview">
         /// if set to <c>true</c> disables link previews for links in this message.
         /// </param>
@@ -677,11 +774,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the photo at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendPhotoAsync(chatId, fileStream, fileName, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -784,11 +881,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the sticker at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendStickerAsync(chatId, fileStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -912,11 +1009,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the video file at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendVideoAsync(chatId, fileStream, fileName, duration, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -1036,11 +1133,11 @@
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
-            if( !File.Exists(filePath) )
+            if( !System.IO.File.Exists(filePath) )
                 throw new FileNotFoundException("Unable to find the audio file at the specified location.", filePath);
 
             var fileName = Path.GetFileName(filePath);
-            var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            var fileStream = System.IO.File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendVoiceAsync(chatId, fileStream, fileName, duration, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -1090,13 +1187,13 @@
                 await this.Client.PostAsync(url, null, cancellationToken).ConfigureAwait(false);
             else
             {
-                if( !File.Exists(certificatePath) )
+                if( !System.IO.File.Exists(certificatePath) )
                     throw new FileNotFoundException("Unable to find the certificate file at the specified location.", certificatePath);
 
                 using( var content = new MultipartFormDataContent() )
                 {
                     var fileName = Path.GetFileName(certificatePath);
-                    var fileStream = File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    var fileStream = System.IO.File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
                     content.Add(new StreamContent(fileStream), "certificate", fileName);
                     content.Add(new StringContent(url), "url");
 
@@ -1119,9 +1216,9 @@
         protected virtual HttpClient CreateHttpClient()
         {
             var client = new HttpClient
-                {
-                    BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
-                };
+            {
+                BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
+            };
 
             return client;
         }
