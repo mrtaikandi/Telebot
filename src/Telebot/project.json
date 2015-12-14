@@ -1,29 +1,28 @@
 ﻿{
   "title": "Telebot",
-  "version": "1.1.10",
+  "version": "1.1.15",
   "description": "Telegram Bot API client library for .NET.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "telegram", "telegram bot" ],
   "projectUrl": "https://github.com/mrtaikandi/Telebot",
   "licenseUrl": "https://github.com/mrtaikandi/Telebot/blob/master/LICENSE",
-  
+
   "dependencies": {
     "Newtonsoft.Json": "7.0.1",
-    "Microsoft.AspNet.WebApi.Client": "5.2.3"
+    "Microsoft.AspNet.WebApi.Client": "5.2.3",
+    "System.Runtime.Serialization.Xml": "4.1.0-beta-23516"
   },
 
   "frameworks": {
-    "net45": { },
-    "net451": { },
-    "net452": { },
-    "net46": { },
-    "dnx451": { },
-    "dnx452": { },
+
     "dnxcore50": {
       "dependencies": {
-        "System.Runtime.Extensions": "4.0.10-*",
-        "System.Linq.Expressions": "4.0.10-*",
-        "System.Net.Http": "4.0.0-*"
+        "System.Runtime.Extensions": "4.0.11-*",
+        "System.Linq.Expressions": "4.0.11-*",
+        "System.ComponentModel.Annotations": "4.0.11-*",
+        "System.IO": "4.0.11-beta-23516",
+        "System.IO.FileSystem": "4.0.1-beta-23516",
+        "System.Net.Http": "4.0.1-*",        
       }
     }
   }

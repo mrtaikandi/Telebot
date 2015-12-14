@@ -1,30 +1,26 @@
 ﻿namespace Taikandi.Telebot.Types
 {
+    using System.ComponentModel.DataAnnotations;
+
     using Newtonsoft.Json;
 
-    /// <summary>
-    /// This object represents a phone contact.
-    /// </summary>
+    /// <summary>This object represents a phone contact.</summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Contact
     {
         #region Public Properties
 
-        /// <summary>
-        /// Gets or sets the contact's first name
-        /// </summary>
+        /// <summary>Gets or sets the contact's first name</summary>
+        [Required]
         [JsonProperty("first_name", Required = Required.Always)]
         public string FirstName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the contact's last name (Optional).
-        /// </summary>
+        /// <summary>Gets or sets the contact's last name (Optional).</summary>
         [JsonProperty("last_name")]
         public string LastName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the contact's phone number.
-        /// </summary>
+        /// <summary>Gets or sets the contact's phone number.</summary>
+        [Required]
         [JsonProperty("photo_number", Required = Required.Always)]
         public string PhoneNumber { get; set; }
 

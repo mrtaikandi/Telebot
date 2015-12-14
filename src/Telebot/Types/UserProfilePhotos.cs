@@ -4,9 +4,7 @@
 
     using Newtonsoft.Json;
 
-    /// <summary>
-    /// This object represent a user's profile pictures.
-    /// </summary>
+    /// <summary>This object represent a user's profile pictures.</summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class UserProfilePhotos
     {

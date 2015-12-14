@@ -1,5 +1,7 @@
 ﻿namespace Taikandi.Telebot.Types
 {
+    using System.ComponentModel.DataAnnotations;
+
     using Newtonsoft.Json;
 
     /// <summary>
@@ -10,9 +12,8 @@
     {
         #region Public Properties
 
-        /// <summary>
-        /// Gets or sets the unique file identifier.
-        /// </summary>
+        /// <summary>Gets or sets the unique file identifier.</summary>
+        [Required]
         [JsonProperty("file_id", Required = Required.Always)]
         public string FileId { get; set; }
 
@@ -22,9 +23,7 @@
         [JsonProperty("file_name")]
         public string FileName { get; set; }
 
-        /// <summary>
-        /// Gets or sets the file size (Optional).
-        /// </summary>
+        /// <summary>Gets or sets the file size (Optional).</summary>
         [JsonProperty("file_size")]
         public int FileSize { get; set; }
 

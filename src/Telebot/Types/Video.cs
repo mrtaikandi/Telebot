@@ -1,10 +1,10 @@
 ﻿namespace Taikandi.Telebot.Types
 {
+    using System.ComponentModel.DataAnnotations;
+
     using Newtonsoft.Json;
 
-    /// <summary>
-    /// This object represents a video file.
-    /// </summary>
+    /// <summary>This object represents a video file.</summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Video
     {
@@ -25,12 +25,11 @@
         /// <summary>
         /// Gets or sets the unique identifier for this file.
         /// </summary>
+        [Required]
         [JsonProperty("file_id", Required = Required.Always)]
         public string FileId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the file size (Optional).
-        /// </summary>
+        /// <summary>Gets or sets the file size (Optional).</summary>
         [JsonProperty("file_size")]
         public int FileSize { get; set; }
 
@@ -46,9 +45,7 @@
         [JsonProperty("mime_type")]
         public string MimeType { get; set; }
 
-        /// <summary>
-        /// Gets or sets the video thumbnail.
-        /// </summary>
+        /// <summary>Gets or sets the video thumbnail.</summary>
         [JsonProperty("thumb")]
         public PhotoSize Thumb { get; set; }
 

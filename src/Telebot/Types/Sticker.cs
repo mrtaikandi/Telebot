@@ -1,10 +1,10 @@
 ﻿namespace Taikandi.Telebot.Types
 {
+    using System.ComponentModel.DataAnnotations;
+
     using Newtonsoft.Json;
 
-    /// <summary>
-    /// This object represents a sticker.
-    /// </summary>
+    /// <summary>This object represents a sticker.</summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class Sticker
     {
@@ -13,18 +13,15 @@
         /// <summary>
         /// Gets or sets the unique identifier for this file.
         /// </summary>
+        [Required]
         [JsonProperty("file_id", Required = Required.Always)]
         public string FileId { get; set; }
 
-        /// <summary>
-        /// Gets or sets the file size (Optional).
-        /// </summary>
+        /// <summary>Gets or sets the file size (Optional).</summary>
         [JsonProperty("file_size")]
         public int FileSize { get; set; }
 
-        /// <summary>
-        /// Gets or sets the sticker height.
-        /// </summary>
+        /// <summary>Gets or sets the sticker height.</summary>
         [JsonProperty("height", Required = Required.Always)]
         public int Height { get; set; }
 
@@ -34,9 +31,7 @@
         [JsonProperty("thumb")]
         public PhotoSize Thumb { get; set; }
 
-        /// <summary>
-        /// Gets or sets the sticker width.
-        /// </summary>
+        /// <summary>Gets or sets the sticker width.</summary>
         [JsonProperty("width", Required = Required.Always)]
         public int Width { get; set; }
 

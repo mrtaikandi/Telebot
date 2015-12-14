@@ -5,11 +5,9 @@
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChatAction"/> class.
+        /// Initializes a new instance of the <see cref="ChatAction" /> class.
         /// </summary>
-        /// <param name="value">
-        /// The chat action value.
-        /// </param>
+        /// <param name="value">The chat action value.</param>
         private ChatAction(string value)
         {
             this.Value = value;
@@ -39,7 +37,7 @@
 
         #endregion
 
-        #region Public Methods
+        #region Public Methods and Operators
 
         public static bool operator ==(ChatAction a, ChatAction b)
         {
@@ -61,23 +59,20 @@
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="T:System.Object"/> is equal to the current <see cref="T:System.Object"/>.
+        /// Determines whether the specified <see cref="T:System.Object" /> is equal to the current
+        /// <see cref="T:System.Object" />.
         /// </summary>
         /// <returns>
         /// true if the specified object  is equal to the current object; otherwise, false.
         /// </returns>
-        /// <param name="obj">
-        /// The object to compare with the current object.
-        /// </param>
+        /// <param name="obj">The object to compare with the current object.</param>
         public override bool Equals(object obj)
         {
             var chatAction = obj as ChatAction;
             return this.Equals(chatAction);
         }
 
-        /// <summary>
-        /// Serves as a hash function for a particular type.
-        /// </summary>
+        /// <summary>Serves as a hash function for a particular type.</summary>
         /// <returns>
         /// A hash code for the current <see cref="T:System.Object" />.
         /// </returns>
@@ -89,9 +84,7 @@
         /// <summary>
         /// Returns a string that represents the current object.
         /// </summary>
-        /// <returns>
-        /// A string that represents the current object.
-        /// </returns>
+        /// <returns>A string that represents the current object.</returns>
         public override string ToString()
         {
             return this.Value;
@@ -102,13 +95,15 @@
         #region Methods
 
         /// <summary>
-        /// Determines whether the specified <see cref="ChatAction"/> is equal to the current <see cref="ChatAction"/>.
+        /// Determines whether the specified <see cref="ChatAction" /> is equal to the current
+        /// <see cref="ChatAction" />.
         /// </summary>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="ChatAction"/> is equal to the current instance; otherwise, <c>false</c>.
+        /// <c>true</c> if the specified <see cref="ChatAction" /> is equal to the current instance; otherwise,
+        /// <c>false</c>.
         /// </returns>
         /// <param name="other">
-        /// The <see cref="ChatAction"/> to compare with the current instance.
+        /// The <see cref="ChatAction" /> to compare with the current instance.
         /// </param>
         protected bool Equals(ChatAction other)
         {
