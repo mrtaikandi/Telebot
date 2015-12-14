@@ -1,6 +1,6 @@
 ﻿namespace Taikandi.Telebot.Types
 {
-    public class TelegramResult<TResult>
+    public class TelegramResponse<TResult>
     {
         #region Public Properties
 

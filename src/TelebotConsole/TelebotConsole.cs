@@ -40,7 +40,7 @@
             // the identifiers of previously received updates. By default, updates starting with the earliest
             // unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is
             // called with an offset higher than its update_id.
-            this._offset = 684028990;
+            this._offset = 684029000;
         }
 
         #endregion
@@ -85,9 +85,9 @@
 
         #region Methods
 
-        private static void Dump<TResult>(TelegramResult<TResult> result)
+        private static void Dump<TResult>(TelegramResponse<TResult> response)
         {
-            var serializedResult = JsonConvert.SerializeObject(result, Formatting.Indented);
+            var serializedResult = JsonConvert.SerializeObject(response, Formatting.Indented);
             Console.Write(serializedResult);
         }
 
@@ -130,18 +130,18 @@
                 return;
 
             var message = update.Message;
-            await this._telebot.SendMessageAsync(message.Chat.Id, message.Text);
+            await this._telebot.SendMessageAsync(message, message.Text);
         }
 
         private Task SendChatAction(Update update)
         {
-            return this._telebot.SendChatAction(update.Message.Chat.Id, ChatAction.Typing);
+            return this._telebot.SendChatAction(update.Message.Chat.Id.ToString(), ChatAction.Typing);
         }
 
         private Task SendPhoto(Update update)
         {
-            var actionTask = this._telebot.SendChatAction(update.Message.Chat.Id, ChatAction.UploadPhoto);
-            var sendTask = this._telebot.SendPhotoFromFileAsync(update.Message.Chat.Id, @"D:\Temp\brekeke-frog-symbol.jpg", "The Frog!");
+            var actionTask = this._telebot.SendChatAction(update.Message.Chat.Id.ToString(), ChatAction.UploadPhoto);
+            var sendTask = this._telebot.SendPhotoFromFileAsync(update.Message.Chat.Id.ToString(), @"D:\Temp\brekeke-frog-symbol.jpg", "The Frog!");
 
             return Task.WhenAll(actionTask, sendTask);
         }
