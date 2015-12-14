@@ -26,15 +26,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.5.1": {
@@ -60,15 +51,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -96,15 +78,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.6": {
@@ -130,15 +103,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -166,15 +130,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     "DNX,Version=v4.5.2": {
@@ -200,15 +155,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -623,15 +569,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.5/win7-x64": {
@@ -657,15 +594,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -693,15 +621,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x64": {
@@ -727,15 +646,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -763,15 +673,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.5.2/win7-x64": {
@@ -797,15 +698,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -833,15 +725,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     ".NETFramework,Version=v4.6/win7-x64": {
@@ -867,15 +750,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -903,15 +777,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     "DNX,Version=v4.5.1/win7-x64": {
@@ -937,15 +802,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -973,15 +829,6 @@
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
         }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
-        }
       }
     },
     "DNX,Version=v4.5.2/win7-x64": {
@@ -1007,15 +854,6 @@
         },
         "runtime": {
           "lib/net45/Newtonsoft.Json.dll": {}
-        }
-      },
-      "System.Runtime.Serialization.Xml/4.1.0-beta-23516": {
-        "type": "package",
-        "compile": {
-          "ref/net45/_._": {}
-        },
-        "runtime": {
-          "lib/net45/_._": {}
         }
       }
     },
@@ -4550,8 +4388,7 @@
   "projectFileDependencyGroups": {
     "": [
       "Newtonsoft.Json >= 7.0.1",
-      "Microsoft.AspNet.WebApi.Client >= 5.2.3",
-      "System.Runtime.Serialization.Xml >= 4.1.0-beta-23516"
+      "Microsoft.AspNet.WebApi.Client >= 5.2.3"
     ],
     ".NETFramework,Version=v4.5": [
       "fx/System.ComponentModel.DataAnnotations >= 4.0.0"
@@ -4577,7 +4414,8 @@
       "System.ComponentModel.Annotations >= 4.0.11-*",
       "System.IO >= 4.0.11-beta-23516",
       "System.IO.FileSystem >= 4.0.1-beta-23516",
-      "System.Net.Http >= 4.0.1-*"
+      "System.Net.Http >= 4.0.1-*",
+      "System.Runtime.Serialization.Xml >= 4.1.0-beta-23516"
     ]
   }
 }
