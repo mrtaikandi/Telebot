@@ -1,4 +1,5 @@
-﻿namespace TelebotConsole
+﻿// ReSharper disable ConsiderUsingConfigureAwait
+namespace TelebotConsole
 {
     using System;
     using System.Collections.Generic;
@@ -56,14 +57,13 @@
             {
                 while( true )
                 {
-                    var update = await this._telebot.GetUpdatesAsync(this._offset);
-                    if( update.Ok && update.Result.Any() )
+                    var update = (await this._telebot.GetUpdatesAsync(this._offset)).ToList();                    
+                    if( update.Any() )
                     {
                         Dump(update);
+                        this._offset = update.Max(u => u.Id) + 1;
 
-                        this._offset = update.Result.Max(u => u.Id) + 1;
-
-                        foreach( var result in update.Result )
+                        foreach( var result in update )
                         {
                             await this.CheckMessages(result);
                         }
@@ -85,7 +85,7 @@
 
         #region Methods
 
-        private static void Dump<TResult>(TelegramResponse<TResult> response)
+        private static void Dump<TResult>(TResult response)
         {
             var serializedResult = JsonConvert.SerializeObject(response, Formatting.Indented);
             Console.Write(serializedResult);

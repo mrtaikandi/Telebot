@@ -254,14 +254,9 @@
         /// cancellation.
         /// </param>
         /// <returns>An Array of Update objects.</returns>
-        public async Task<TelegramResponse<IList<Update>>> GetUpdatesAsync(long offset = 0, int limit = 100, int timeout = 0, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var response = await this.Client
-                                     .GetAsync($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}", cancellationToken)
-                                     .ConfigureAwait(false);
-
-            EnsureSuccessStatusCode(response);
-            return await response.Content.ReadAsAsync<TelegramResponse<IList<Update>>>(cancellationToken).ConfigureAwait(false);
+        public async Task<IEnumerable<Update>> GetUpdatesAsync(long offset = 0, int limit = 100, int timeout = 0, CancellationToken cancellationToken = default(CancellationToken))
+        {            
+            return await this.CallTelegramMethodAsync<IEnumerable<Update>>($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}", cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Gets a list of profile pictures for a user.</summary>
@@ -279,7 +274,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="UserProfilePhotos" />.
         /// </returns>
-        public async Task<TelegramResponse<UserProfilePhotos>> GetUserProfilePhotos(int userId, int offset = -1, int limit = 100, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<UserProfilePhotos> GetUserProfilePhotos(int userId, int offset = -1, int limit = 100, CancellationToken cancellationToken = default(CancellationToken))
         {
             var builder = new StringBuilder();
             builder.AppendFormat("getUserProfilePhotos?user_id={0}&limit={1}", userId, limit);
@@ -287,12 +282,7 @@
             if( offset >= 0 )
                 builder.AppendFormat("offset={0}", offset);
 
-            var response = await this.Client
-                                     .GetAsync(builder.ToString(), cancellationToken)
-                                     .ConfigureAwait(false);
-
-            EnsureSuccessStatusCode(response);
-            return await response.Content.ReadAsAsync<TelegramResponse<UserProfilePhotos>>(cancellationToken).ConfigureAwait(false);
+            return await this.CallTelegramMethodAsync<UserProfilePhotos>(builder.ToString(), cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1959,22 +1949,22 @@
             throw new HttpRequestException(response);
         }
 
-        private Task<Message> CallTelegramMethodAsync(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        private Task<Message> CallTelegramMethodAsync(string url, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
         {
-            return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return this.CallTelegramMethodAsync<Message>(url, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
-        private Task<Message> CallTelegramMethodAsync(string uri, NameValueCollection parameters, string chatId, CancellationToken cancellationToken)
+        private Task<Message> CallTelegramMethodAsync(string url, NameValueCollection parameters, string chatId, CancellationToken cancellationToken)
         {
-            return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, -1, null, cancellationToken);
+            return this.CallTelegramMethodAsync<Message>(url, parameters, chatId, -1, null, cancellationToken);
         }
 
-        private Task<T> CallTelegramMethodAsync<T>(string uri, CancellationToken cancellationToken)
+        private Task<T> CallTelegramMethodAsync<T>(string url, CancellationToken cancellationToken)
         {
-            return this.CallTelegramMethodAsync<T>(uri, null, null, -1, null, cancellationToken);
+            return this.CallTelegramMethodAsync<T>(url, null, null, -1, null, cancellationToken);
         }
 
-        private async Task<T> CallTelegramMethodAsync<T>(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        private async Task<T> CallTelegramMethodAsync<T>(string url, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
         {
             if( !string.IsNullOrWhiteSpace(chatId) )
                 parameters.Add("chat_id", chatId);
@@ -1985,10 +1975,17 @@
             if( replyMarkup != null )
                 parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
 
+            if( parameters == null )
+            {
+                using( var response = await this.Client.GetAsync(url, cancellationToken).ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<T>(response, cancellationToken).ConfigureAwait(false);
+                }
+            }
+
             using( var content = new FormUrlEncodedContent(parameters) )
             {
-                var task = parameters != null ? this.Client.PostAsync(uri, content, cancellationToken) : this.Client.GetAsync(uri, cancellationToken);
-                using( var response = await task.ConfigureAwait(false) )
+                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
                 {
                     return await ReadTelegramResponseAsync<T>(response, cancellationToken).ConfigureAwait(false);
                 }
