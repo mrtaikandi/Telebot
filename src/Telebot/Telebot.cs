@@ -97,11 +97,11 @@
                 throw new InvalidOperationException($"File \"{fullPath}\" already exists.");
 
             var url = file.GetDownloadUrl(this.ApiKey);
-            using( var response = await this.Client.GetStreamAsync(url) )
+            using( var response = await this.Client.GetStreamAsync(url).ConfigureAwait(false) )
             {
                 using( var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None) )
                 {
-                    await response.CopyToAsync(fileStream, 81920, cancellationToken);
+                    await response.CopyToAsync(fileStream, 81920, cancellationToken).ConfigureAwait(false);
                 }
             }
         }
@@ -116,23 +116,25 @@
         /// channel (in the format @channelusername).
         /// </param>
         /// <param name="messageId">Unique message identifier</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> ForwardMessageAsync(string chatId, string fromChatId, long messageId)
+        public async Task<Message> ForwardMessageAsync([NotNull] string chatId, string fromChatId, long messageId, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             var parameters = new NameValueCollection
                                  {
-                                     { "chat_id", chatId }, 
                                      { "from_chat_id", fromChatId }, 
                                      { "message_id", messageId.ToString() }
                                  };
 
-            var content = new FormUrlEncodedContent(parameters);
-            var response = await this.Client.PostAsync("forwardMessage", content).ConfigureAwait(false);
-            EnsureSuccessStatusCode(response);
-
-            return await response.Content.ReadAsAsync<TelegramResponse<Message>>().ConfigureAwait(false);
+            return await this.CallTelegramMethodAsync("forwardMessage", parameters, chatId, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Forwards message of any kind.</summary>
@@ -142,12 +144,16 @@
         /// channel (in the format @channelusername).
         /// </param>
         /// <param name="messageId">Unique message identifier</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> ForwardMessageAsync(long chatId, string fromChatId, long messageId)
+        public Task<Message> ForwardMessageAsync(long chatId, string fromChatId, long messageId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.ForwardMessageAsync(chatId.ToString(), fromChatId, messageId);
+            return this.ForwardMessageAsync(chatId.ToString(), fromChatId, messageId, cancellationToken);
         }
 
         /// <summary>Forwards message of any kind.</summary>
@@ -156,12 +162,16 @@
         /// Unique identifier for the chat where the original message was sent.
         /// </param>
         /// <param name="messageId">Unique message identifier</param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> ForwardMessageAsync(long chatId, long fromChatId, long messageId)
+        public Task<Message> ForwardMessageAsync(long chatId, long fromChatId, long messageId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.ForwardMessageAsync(chatId.ToString(), fromChatId.ToString(), messageId);
+            return this.ForwardMessageAsync(chatId.ToString(), fromChatId.ToString(), messageId, cancellationToken);
         }
 
         /// <summary>
@@ -181,8 +191,8 @@
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task GetFile([NotNull] string fileId, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var file = await this.GetFile(fileId, cancellationToken);
-            await this.DownloadFile(file.Result, fullPath, overwrite, cancellationToken);
+            var file = await this.GetFile(fileId, cancellationToken).ConfigureAwait(false);
+            await this.DownloadFile(file, fullPath, overwrite, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -197,31 +207,28 @@
         /// <returns>
         /// On success, a <see cref="Types.File" /> object containing basic info about the file to download.
         /// </returns>
-        public async Task<TelegramResponse<File>> GetFile([NotNull] string fileId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<File> GetFile([NotNull] string fileId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( string.IsNullOrWhiteSpace(fileId) )
                 throw new ArgumentNullException(nameof(fileId));
 
-            var response = await this.Client
-                                     .GetAsync($"getFile?file_id={fileId}", cancellationToken)
-                                     .ConfigureAwait(false);
-
-            EnsureSuccessStatusCode(response);
-            return await response.Content.ReadAsAsync<TelegramResponse<File>>(cancellationToken).ConfigureAwait(false);
+            return await this.CallTelegramMethodAsync<File>($"getFile?file_id={fileId}", cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
         /// A simple method for testing your bot's auth token. Requires no parameters. Returns basic
         /// information about the bot in form of a User object.
         /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
         /// <returns>
         /// Basic information about the bot in form of a User object.
         /// </returns>
-        public async Task<TelegramResponse<User>> GetMeAsync()
+        public async Task<User> GetMeAsync(CancellationToken cancellationToken = default(CancellationToken))
         {
-            var response = await this.Client.GetAsync("getMe").ConfigureAwait(false);
-            EnsureSuccessStatusCode(response);
-            return await response.Content.ReadAsAsync<TelegramResponse<User>>().ConfigureAwait(false);
+            return await this.CallTelegramMethodAsync<User>("getMe", cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -320,8 +327,11 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendAudioAsync(string chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(audioId) )
                 throw new ArgumentNullException(nameof(audioId));
 
@@ -336,7 +346,7 @@
             if( title != null )
                 parameters.Add("title", title);
 
-            return await this.CallTelegramMethodAsync("sendAudio", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendAudio", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -368,7 +378,7 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendAudioAsync(long chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync(long chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendAudioAsync(chatId.ToString(), audioId, duration, performer, title, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -403,7 +413,7 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendAudioAsync(long chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync(long chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendAudioAsync(chatId.ToString(), audioStream, fileName, duration, performer, title, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -441,8 +451,11 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendAudioAsync(string chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( audioStream == null )
                 throw new ArgumentNullException(nameof(audioStream));
 
@@ -457,7 +470,7 @@
             if( title != null )
                 content.Add(new StringContent(title), "title");
 
-            return await this.CallTelegramMethodAsync("sendAudio", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendAudio", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -487,7 +500,7 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendAudioFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendAudioFromFileAsync(chatId.ToString(), filePath, duration, performer, title, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -522,8 +535,11 @@
         /// as <see cref="Document" />). Bots can currently send audio files of up to 50 MB in size, this limit
         /// may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendAudioFromFileAsync(string chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -559,7 +575,7 @@
         /// with action = upload_photo. The user will see a "sending photo" status for the bot.
         /// </example>
         /// </remarks>
-        public Task<TelegramResponse<bool>> SendChatAction(long chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> SendChatAction(long chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendChatAction(chatId.ToString(), action, cancellationToken);
         }
@@ -591,10 +607,13 @@
         /// with action = upload_photo. The user will see a "sending photo" status for the bot.
         /// </example>
         /// </remarks>
-        public async Task<TelegramResponse<bool>> SendChatAction(string chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<bool> SendChatAction([NotNull] string chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             var parameters = new NameValueCollection { { "action", action.Value } };
-            return await this.CallTelegramMethodAsync<bool>("sendChatAction", parameters, chatId, -1, null, cancellationToken);
+            return await this.CallTelegramMethodAsync<bool>("sendChatAction", parameters, chatId, -1, null, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a general file.</summary>
@@ -620,7 +639,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendDocumentAsync(long chatId, [NotNull] string documentId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync(long chatId, [NotNull] string documentId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendDocumentAsync(chatId.ToString(), documentId, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -651,13 +670,16 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendDocumentAsync(string chatId, [NotNull] string documentId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] string documentId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(documentId) )
                 throw new ArgumentNullException(nameof(documentId));
 
             var parameters = new NameValueCollection { { "document", documentId } };
-            return await this.CallTelegramMethodAsync("sendDocument", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendDocument", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a general file.</summary>
@@ -686,7 +708,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendDocumentAsync(long chatId, [NotNull] Stream documentStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync(long chatId, [NotNull] Stream documentStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendDocumentAsync(chatId.ToString(), documentStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -720,13 +742,16 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendDocumentAsync(string chatId, [NotNull] Stream documentStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] Stream documentStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( documentStream == null )
                 throw new ArgumentNullException(nameof(documentStream));
 
             var content = new MultipartFormDataContent { { new StreamContent(documentStream), "document", fileName } };
-            return await this.CallTelegramMethodAsync("sendDocument", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendDocument", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a general file.</summary>
@@ -750,7 +775,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendDocumentFromFileAsync(long chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentFromFileAsync(long chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendDocumentFromFileAsync(chatId.ToString(), filePath, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -779,8 +804,11 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendDocumentFromFileAsync(string chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -810,7 +838,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendLocationAsync(long chatId, double latitude, double longitude, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendLocationAsync(long chatId, double latitude, double longitude, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendLocationAsync(chatId.ToString(), latitude, longitude, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -836,15 +864,18 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendLocationAsync(string chatId, double latitude, double longitude, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendLocationAsync([NotNull] string chatId, double latitude, double longitude, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             var parameters = new NameValueCollection
                                  {
                                      { "latitude", latitude.ToString(CultureInfo.InvariantCulture) }, 
                                      { "longitude", longitude.ToString(CultureInfo.InvariantCulture) }
                                  };
 
-            return await this.CallTelegramMethodAsync("sendLocation", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendLocation", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a text message.</summary>
@@ -870,7 +901,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendMessageAsync(long chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendMessageAsync(long chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendMessageAsync(chatId.ToString(), text, parseMode, disableWebPagePreview, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -901,8 +932,11 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendMessageAsync(string chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendMessageAsync([NotNull] string chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( text == null )
                 throw new ArgumentNullException(nameof(text));
 
@@ -914,7 +948,7 @@
             if( parseMode != null && parseMode != ParseMode.Normal )
                 parameters.Add("parse_mode", parseMode.Value);
 
-            return await this.CallTelegramMethodAsync("sendMessage", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendMessage", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -941,7 +975,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendMessageAsync(Message message, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendMessageAsync(Message message, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendMessageAsync(message.Chat.Id.ToString(), text, parseMode, disableWebPagePreview, message.ReplyToMessage?.Id ?? 0, replyMarkup ?? new ReplyKeyboardHide(), cancellationToken);
         }
@@ -968,7 +1002,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendPhotoAsync(long chatId, [NotNull] string documentId, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync(long chatId, [NotNull] string documentId, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendPhotoAsync(chatId.ToString(), documentId, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -998,8 +1032,11 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendPhotoAsync(string chatId, [NotNull] string documentId, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] string documentId, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(documentId) )
                 throw new ArgumentNullException(nameof(documentId));
 
@@ -1008,7 +1045,7 @@
             if( !string.IsNullOrWhiteSpace(caption) )
                 parameters.Add("caption", caption);
 
-            return await this.CallTelegramMethodAsync("sendPhoto", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendPhoto", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a photo.</summary>
@@ -1034,7 +1071,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendPhotoAsync(long chatId, [NotNull] Stream photoStream, string fileName, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync(long chatId, [NotNull] Stream photoStream, string fileName, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendPhotoAsync(chatId.ToString(), photoStream, fileName, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1065,8 +1102,11 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendPhotoAsync(string chatId, [NotNull] Stream photoStream, string fileName, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] Stream photoStream, string fileName, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( photoStream == null )
                 throw new ArgumentNullException(nameof(photoStream));
 
@@ -1075,7 +1115,7 @@
             if( !string.IsNullOrWhiteSpace(caption) )
                 content.Add(new StringContent(caption), "caption");
 
-            return await this.CallTelegramMethodAsync("sendPhoto", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendPhoto", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a photo.</summary>
@@ -1098,7 +1138,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendPhotoFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendPhotoFromFileAsync(chatId.ToString(), filePath, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1126,8 +1166,11 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendPhotoFromFileAsync(string chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -1158,7 +1201,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendStickerAsync(long chatId, [NotNull] string stickerId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync(long chatId, [NotNull] string stickerId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendStickerAsync(chatId.ToString(), stickerId, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1185,13 +1228,16 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendStickerAsync(string chatId, [NotNull] string stickerId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] string stickerId, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(stickerId) )
                 throw new ArgumentNullException(nameof(stickerId));
 
             var parameters = new NameValueCollection { { "sticker", stickerId } };
-            return await this.CallTelegramMethodAsync("sendSticker", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendSticker", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends <c>.webp</c> sticker.</summary>
@@ -1216,7 +1262,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<TelegramResponse<Message>> SendStickerAsync(long chatId, [NotNull] Stream stickerStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync(long chatId, [NotNull] Stream stickerStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendStickerAsync(chatId.ToString(), stickerStream, fileName, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1246,14 +1292,17 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<TelegramResponse<Message>> SendStickerAsync(string chatId, [NotNull] Stream stickerStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] Stream stickerStream, string fileName, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( stickerStream == null )
                 throw new ArgumentNullException(nameof(stickerStream));
 
             var content = new MultipartFormDataContent { { new StreamContent(stickerStream), "sticker", fileName } };
 
-            return await this.CallTelegramMethodAsync("sendSticker", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendSticker", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends <c>.webp</c> sticker.</summary>
@@ -1277,7 +1326,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendStickerFromFileAsync(long chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerFromFileAsync(long chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendStickerFromFileAsync(chatId.ToString(), filePath, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1306,8 +1355,11 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendStickerFromFileAsync(string chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -1344,7 +1396,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVideoAsync(long chatId, [NotNull] string videoId, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync(long chatId, [NotNull] string videoId, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVideoAsync(chatId.ToString(), videoId, duration, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1377,8 +1429,11 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendVideoAsync(string chatId, [NotNull] string videoId, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] string videoId, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(videoId) )
                 throw new ArgumentNullException(nameof(videoId));
 
@@ -1389,7 +1444,7 @@
             if( caption != null )
                 parameters.Add("caption", caption);
 
-            return await this.CallTelegramMethodAsync("sendVideo", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendVideo", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a video file.</summary>
@@ -1418,7 +1473,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVideoAsync(long chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync(long chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVideoAsync(chatId.ToString(), videoStream, fileName, duration, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1452,8 +1507,11 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendVideoAsync(string chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( videoStream == null )
                 throw new ArgumentNullException(nameof(videoStream));
 
@@ -1464,7 +1522,7 @@
             if( caption != null )
                 content.Add(new StringContent(caption), "caption");
 
-            return await this.CallTelegramMethodAsync("sendVideo", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendVideo", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>Sends a video file.</summary>
@@ -1490,7 +1548,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVideoFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVideoFromFileAsync(chatId.ToString(), filePath, duration, caption, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1521,8 +1579,11 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVideoFromFileAsync(string chatId, [NotNull] string filePath, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, string caption = null, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -1561,7 +1622,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVoiceAsync(chatId.ToString(), voice, duration, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1596,8 +1657,11 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendVoiceAsync(string chatId, [NotNull] string voice, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] string voice, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(voice) )
                 throw new ArgumentNullException(nameof(voice));
 
@@ -1606,7 +1670,7 @@
             if( duration > 0 )
                 parameters.Add("duration", duration.ToString());
 
-            return await this.CallTelegramMethodAsync("sendVoice", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendVoice", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1637,7 +1701,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVoiceAsync(chatId.ToString(), voiceStream, fileName, duration, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1673,8 +1737,11 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public async Task<TelegramResponse<Message>> SendVoiceAsync(string chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( voiceStream == null )
                 throw new ArgumentNullException(nameof(voiceStream));
 
@@ -1682,7 +1749,7 @@
             if( duration > 0 )
                 content.Add(new StringContent(duration.ToString()), "duration");
 
-            return await this.CallTelegramMethodAsync("sendVoice", content, chatId, replyToMessageId, replyMarkup, cancellationToken);
+            return await this.CallTelegramMethodAsync("sendVoice", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -1710,7 +1777,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendVoiceFromFileAsync(chatId.ToString(), filePath, duration, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -1743,8 +1810,11 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<TelegramResponse<Message>> SendVoiceFromFileAsync(string chatId, [NotNull] string filePath, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            if( chatId == null )
+                throw new ArgumentNullException(nameof(chatId));
+
             if( string.IsNullOrWhiteSpace(filePath) )
                 throw new ArgumentNullException(nameof(filePath));
 
@@ -1872,17 +1942,42 @@
             if( response.StatusCode == HttpStatusCode.BadGateway )
                 throw new ServiceUnavailableException();
 
-            response.EnsureSuccessStatusCode();
+            throw new HttpRequestException(response);
         }
 
-        private Task<TelegramResponse<Message>> CallTelegramMethodAsync(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        private static async Task<T> ReadTelegramResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
+        {
+            if( response.IsSuccessStatusCode )
+            {
+                var telegramResponse = await response.Content.ReadAsAsync<TelegramResponse<T>>(cancellationToken).ConfigureAwait(false);
+                return telegramResponse.Result;
+            }
+
+            if( response.StatusCode == HttpStatusCode.BadGateway )
+                throw new ServiceUnavailableException();
+
+            throw new HttpRequestException(response);
+        }
+
+        private Task<Message> CallTelegramMethodAsync(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
         {
             return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
         }
 
-        private async Task<TelegramResponse<T>> CallTelegramMethodAsync<T>(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        private Task<Message> CallTelegramMethodAsync(string uri, NameValueCollection parameters, string chatId, CancellationToken cancellationToken)
         {
-            parameters.Add("chat_id", chatId);
+            return this.CallTelegramMethodAsync<Message>(uri, parameters, chatId, -1, null, cancellationToken);
+        }
+
+        private Task<T> CallTelegramMethodAsync<T>(string uri, CancellationToken cancellationToken)
+        {
+            return this.CallTelegramMethodAsync<T>(uri, null, null, -1, null, cancellationToken);
+        }
+
+        private async Task<T> CallTelegramMethodAsync<T>(string uri, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        {
+            if( !string.IsNullOrWhiteSpace(chatId) )
+                parameters.Add("chat_id", chatId);
 
             if( replyToMessageId > 0 )
                 parameters.Add("reply_to_message_id", replyToMessageId.ToString());
@@ -1892,18 +1987,20 @@
 
             using( var content = new FormUrlEncodedContent(parameters) )
             {
-                var response = await this.Client.PostAsync(uri, content, cancellationToken).ConfigureAwait(false);
-                EnsureSuccessStatusCode(response);
-
-                return await response.Content.ReadAsAsync<TelegramResponse<T>>(cancellationToken).ConfigureAwait(false);
+                var task = parameters != null ? this.Client.PostAsync(uri, content, cancellationToken) : this.Client.GetAsync(uri, cancellationToken);
+                using( var response = await task.ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<T>(response, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
-        private async Task<TelegramResponse<Message>> CallTelegramMethodAsync([NotNull] string url, MultipartFormDataContent content, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
+        private async Task<Message> CallTelegramMethodAsync([NotNull] string url, MultipartFormDataContent content, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
         {
             using( content )
             {
-                content.Add(new StringContent(chatId), "chat_id");
+                if( !string.IsNullOrWhiteSpace(chatId) )
+                    content.Add(new StringContent(chatId), "chat_id");
 
                 if( replyToMessageId >= 0 )
                     content.Add(new StringContent(replyToMessageId.ToString()), "reply_to_message_id");
@@ -1911,10 +2008,10 @@
                 if( replyMarkup != null )
                     content.Add(new StringContent(JsonConvert.SerializeObject(replyMarkup)), "reply_markup");
 
-                var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
-                EnsureSuccessStatusCode(response);
-
-                return await response.Content.ReadAsAsync<TelegramResponse<Message>>(cancellationToken).ConfigureAwait(false);
+                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<Message>(response, cancellationToken).ConfigureAwait(false);
+                }
             }
         }
 
