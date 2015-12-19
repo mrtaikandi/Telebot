@@ -1,6 +1,6 @@
 ﻿{
   "title": "Telebot",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Telegram Bot API client library for .NET.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "telegram", ".net telegram bot" ],

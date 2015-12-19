@@ -84,6 +84,8 @@
         /// A cancellation token that can be used by other objects or threads to receive notice of
         /// cancellation.
         /// </param>
+        /// <exception cref="InvalidOperationException">File already exists in the destination path but overwrite parameter is set to <c>false</c>.</exception>
+        /// <exception cref="ArgumentNullException">file cannot be null | fullPath cannot be null.</exception>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task DownloadFile([NotNull] File file, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -93,17 +95,44 @@
             if( string.IsNullOrWhiteSpace(fullPath) )
                 throw new ArgumentNullException(nameof(fullPath));
 
-            if( System.IO.File.Exists(fullPath) && !overwrite )
+            if( System.IO.File.Exists(fullPath))
+            {
+                if(!overwrite)
                 throw new InvalidOperationException($"File \"{fullPath}\" already exists.");
 
-            var url = file.GetDownloadUrl(this.ApiKey);
-            using( var response = await this.Client.GetStreamAsync(url).ConfigureAwait(false) )
-            {
+                System.IO.File.Delete(fullPath);
+            }
+                        
+            using( var response = await this.DownloadFile(file, cancellationToken).ConfigureAwait(false) )
+            {                
                 using( var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None) )
                 {
                     await response.CopyToAsync(fileStream, 81920, cancellationToken).ConfigureAwait(false);
                 }
             }
+        }
+
+        /// <summary>
+        /// Downloads the file requested by the <see cref="GetFile(string, CancellationToken)" /> method.
+        /// </summary>
+        /// <param name="file">
+        /// The file info received by calling <see cref="GetFile(string, CancellationToken)" />.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
+        /// <exception cref="ArgumentNullException">File cannot be null.</exception>
+        /// <returns>
+        /// Returns a task containing the downloaded file as a stream.
+        /// </returns>
+        public async Task<Stream> DownloadFile([NotNull] File file, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( file == null )
+                throw new ArgumentNullException(nameof(file));
+
+            var url = file.GetDownloadUrl(this.ApiKey);
+            return await this.Client.GetStreamAsync(url).ConfigureAwait(false);
         }
 
         /// <summary>Forwards message of any kind.</summary>
@@ -128,11 +157,7 @@
             if( chatId == null )
                 throw new ArgumentNullException(nameof(chatId));
 
-            var parameters = new NameValueCollection
-                                 {
-                                     { "from_chat_id", fromChatId }, 
-                                     { "message_id", messageId.ToString() }
-                                 };
+            var parameters = new NameValueCollection { { "from_chat_id", fromChatId }, { "message_id", messageId.ToString() } };
 
             return await this.CallTelegramMethodAsync("forwardMessage", parameters, chatId, cancellationToken).ConfigureAwait(false);
         }
@@ -255,7 +280,7 @@
         /// </param>
         /// <returns>An Array of Update objects.</returns>
         public async Task<IEnumerable<Update>> GetUpdatesAsync(long offset = 0, int limit = 100, int timeout = 0, CancellationToken cancellationToken = default(CancellationToken))
-        {            
+        {
             return await this.CallTelegramMethodAsync<IEnumerable<Update>>($"getUpdates?offset={offset}&limit={limit}&timeout={timeout}", cancellationToken).ConfigureAwait(false);
         }
 
@@ -859,11 +884,7 @@
             if( chatId == null )
                 throw new ArgumentNullException(nameof(chatId));
 
-            var parameters = new NameValueCollection
-                                 {
-                                     { "latitude", latitude.ToString(CultureInfo.InvariantCulture) }, 
-                                     { "longitude", longitude.ToString(CultureInfo.InvariantCulture) }
-                                 };
+            var parameters = new NameValueCollection { { "latitude", latitude.ToString(CultureInfo.InvariantCulture) }, { "longitude", longitude.ToString(CultureInfo.InvariantCulture) } };
 
             return await this.CallTelegramMethodAsync("sendLocation", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1892,10 +1913,7 @@
         /// </returns>
         protected virtual HttpClient CreateHttpClient()
         {
-            var client = new HttpClient
-                             {
-                                 BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute)
-                             };
+            var client = new HttpClient { BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute) };
 
             return client;
         }
