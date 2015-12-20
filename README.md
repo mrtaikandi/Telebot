@@ -12,13 +12,15 @@ How can I use it?
 --------------------------------
 
 Simply instanciate `Telebot` class and use available methods.
+`Telebot` internally uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net.http.httpclient%28v=vs.118%29.aspx) so, it is recommended not to dispose it after every request. 
+I suggest to read the `lifecycle` section of the [Designing Evolvable Web APIs with ASP.NET](http://chimera.labs.oreilly.com/books/1234000001708/ch14.html#_httpclient_class).
 
 ```csharp
-public async Task Main(string[] args)
+// Provides a base class for communicating with Telegram Bot API servers.
+private static readonly Telebot = new Telebot("123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11");
+    
+public static void Main(string[] args)
 {
-    // Provides a base class for communicating with Telegram Bot API servers.
-    var telebot = new Telebot("123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11");
-
     // Used for getting only the unconfirmed updates.
     // More information at https://core.telegram.org/bots/api#getting-updates
     var offset = 0; 
@@ -26,15 +28,15 @@ public async Task Main(string[] args)
     while( true )
     {
         // Use this method to receive incoming updates using long polling.
-        // Or use telebot.SetWebhook() method to specifiy a url to receive incoming updates.
-        List<Update> updates = (await telebot.GetUpdatesAsync(offset)).ToList();
+        // Or use Telebot.SetWebhook() method to specifiy a url to receive incoming updates.
+        List<Update> updates = (await Telebot.GetUpdatesAsync(offset)).ToList();
         if( updates.Any() )
         {
             offset = updates.Max(u => u.Id) + 1;        
 
             foreach( Update update in updates )
             {
-                await this.CheckMessagesAsync(telebot, update.Message);
+                await CheckMessagesAsync(telebot, update.Message);
             }
         }
 
@@ -42,7 +44,7 @@ public async Task Main(string[] args)
     }
 }
 
-private async Task CheckMessages(Telebot telebot, Message message)
+private static async Task CheckMessages(Message message)
 {
     // Assume we are doing more than echoing stuff.
     if( message == null )
@@ -51,10 +53,10 @@ private async Task CheckMessages(Telebot telebot, Message message)
     // This method will tell the user that something is happening on the bot's side.
     // It is recommended to use this method when a response from the bot 
     // will take a noticeable amount of time to arrive.
-    await telebot.SendChatAction(message.Chat.Id, ChatAction.Typing);
+    await Telebot.SendChatAction(message.Chat.Id, ChatAction.Typing);
     await Task.Delay(TimeSpan.FromSeconds(3));
     
     // This method will sends a text message (obviously).
-    return await telebot.SendMessageAsync(message.Chat.Id, message.Text ?? "Hmmmm");        
+    return await Telebot.SendMessageAsync(message.Chat.Id, message.Text ?? "Hmmmm");        
 }
 ```
