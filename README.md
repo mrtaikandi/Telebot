@@ -27,12 +27,12 @@ public async Task Main(string[] args)
     {
         // Use this method to receive incoming updates using long polling.
         // Or use telebot.SetWebhook() method to specifiy a url to receive incoming updates.
-        TelegramResult<IList<Update>> response = await telebot.GetUpdatesAsync(offset);
-        if( response.Ok && response.Result.Any() )
+        List<Update> updates = (await telebot.GetUpdatesAsync(offset)).ToList();
+        if( updates.Any() )
         {
-            offset = response.Result.Max(u => u.Id) + 1;        
+            offset = updates.Max(u => u.Id) + 1;        
 
-            foreach( Update update in response.Result )
+            foreach( Update update in updates )
             {
                 await this.CheckMessagesAsync(telebot, update.Message);
             }
