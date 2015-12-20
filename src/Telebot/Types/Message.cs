@@ -3,6 +3,7 @@
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using System.Linq;
 
     using Newtonsoft.Json;
 
@@ -163,6 +164,44 @@
         /// </summary>
         [JsonProperty("text")]
         public string Text { get; set; }
+
+        /// <summary>
+        /// Gets the type of message.
+        /// </summary>
+        public MessageType Type
+        {
+            get
+            {
+                if( !string.IsNullOrWhiteSpace(this.Text) )
+                    return MessageType.Text;
+
+                if( this.Sticker != null )
+                    return MessageType.Sticker;
+
+                if( this.Photos != null && this.Photos.Any() )
+                    return MessageType.Photo;
+
+                if( this.Audio != null )
+                    return MessageType.Audio;
+
+                if( this.Voice != null )
+                    return MessageType.Voice;
+
+                if( this.Video != null )
+                    return MessageType.Video;
+
+                if( this.Document != null )
+                    return MessageType.Document;
+
+                if( this.Location != null )
+                    return MessageType.Location;
+
+                if( this.Contact != null )
+                    return MessageType.Contact;
+
+                return MessageType.Unknown;
+            }
+        }
 
         /// <summary>
         /// Gets or sets the information about the video if message is a video (Optional).
