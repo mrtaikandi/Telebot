@@ -13,7 +13,7 @@ How can I use it?
 
 Simply instanciate `Telebot` class and use available methods.
 `Telebot` internally uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net.http.httpclient%28v=vs.118%29.aspx) so, it is recommended not to dispose it after every request. 
-I suggest to read the `lifecycle` section of the [Designing Evolvable Web APIs with ASP.NET](http://chimera.labs.oreilly.com/books/1234000001708/ch14.html#_httpclient_class).
+I suggest to read the `Lifecycle` section of the [Designing Evolvable Web APIs with ASP.NET](http://chimera.labs.oreilly.com/books/1234000001708/ch14.html#_httpclient_class).
 
 ```csharp
 // Provides a base class for communicating with Telegram Bot API servers.
