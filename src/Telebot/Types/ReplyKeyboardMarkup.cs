@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using Newtonsoft.Json;
 
@@ -87,14 +88,15 @@
         /// <returns>
         /// A <see cref="ReplyKeyboardMarkup" /> filled with the specified <paramref name="keyboardTitles" />.
         /// </returns>
-        public static ReplyKeyboardMarkup CreateReplyKeyboardMarkup(ICollection<string> keyboardTitles, bool oneTimeKeyboard = true, bool selective = true)
+        public static ReplyKeyboardMarkup CreateReplyKeyboardMarkup(IEnumerable<string> keyboardTitles, bool oneTimeKeyboard = true, bool selective = true)
         {
+            var tiles = keyboardTitles as IList<string> ?? keyboardTitles.ToList();
             var markup = new ReplyKeyboardMarkup(oneTimeKeyboard, selective);
-            var totalRows = (int)Math.Ceiling(keyboardTitles.Count / 2d);
+            var totalRows = (int)Math.Ceiling(tiles.Count / 2d);
             markup.Keyboard = new string[totalRows][];
 
             var i = 0;
-            foreach( var title in keyboardTitles )
+            foreach( var title in tiles )
             {
                 var index = (int)(i / 2f);
                 if( i % 2 != 0 )
@@ -103,6 +105,7 @@
                 {
                     markup.Keyboard[index] = new string[2];
                     markup.Keyboard[index][0] = title;
+                    markup.Keyboard[index][1] = string.Empty;
                 }
 
                 i++;
