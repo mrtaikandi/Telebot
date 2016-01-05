@@ -36,7 +36,20 @@ public static void Main(string[] args)
 
             foreach( Update update in updates )
             {
-                await CheckMessagesAsync(telebot, update.Message);
+                switch( update.Type )
+                {
+                    case UpdateType.Message:
+                        await this.CheckMessages(update);
+                        break;
+                    case UpdateType.InlineQuery:
+                        await this.CheckInlineQuery(update);
+                        break;
+                    case UpdateType.ChosenInlineResult:
+                        this.CheckChosenInlineResult(update);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             }
         }
 
@@ -58,5 +71,33 @@ private static async Task CheckMessages(Message message)
     
     // This method will sends a text message (obviously).
     return await Telebot.SendMessageAsync(message.Chat.Id, message.Text ?? "Hmmmm");        
+}
+
+private async Task CheckInlineQuery(Update update)
+{
+    // To see available inline query results:
+    // https://core.telegram.org/bots/api#answerinlinequery
+    var results = new InlineQueryResult[]
+                                 {
+                                     new InlineQueryResultArticle(
+                                             Guid.NewGuid().ToString("N"),
+                                             "This is a title",
+                                             "This is a message.") { ParseMode = ParseMode.Markdown },
+                                     new InlineQueryResultPhoto(
+                                             Guid.NewGuid().ToString("N"),
+                                             "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
+                                             "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"),
+                                     new InlineQueryResultGif(
+                                             Guid.NewGuid().ToString("N"),
+                                             "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
+                                             "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif")
+                                 };
+   
+    await this._telebot.AnswerInlineQueryAsync(update.InlineQuery.Id, results);
+}
+
+private void CheckChosenInlineResult(Update update)
+{
+    Console.WriteLine("Received ChosenInlineResult.");    
 }
 ```
