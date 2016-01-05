@@ -35,7 +35,7 @@ namespace TelebotConsole
 
             // Get Telegram API key from user secrets.
             // https://docs.asp.net/en/latest/security/app-secrets.html
-            this._telegramApiKey = "100639095:AAFetqG3-uHEFaBIr_tOc0Tlvgc-RTlciec"; // configuration["TelegramApiKey"];
+            this._telegramApiKey = configuration["TelegramApiKey"];
 
             // Identifier of the first update to be returned. Must be greater by one than the highest among
             // the identifiers of previously received updates. By default, updates starting with the earliest
