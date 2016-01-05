@@ -161,7 +161,7 @@
           "lib/portable-net45+win8/System.Net.Http.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
@@ -616,18 +616,19 @@
           "ref/dotnet/System.Threading.Tasks.dll": {}
         }
       },
-      "Telebot/2.0.4": {
+      "Telebot/2.1.0": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
-          "Newtonsoft.Json": "7.0.1",
-          "System.ComponentModel.Annotations": "4.0.11",
+          "Newtonsoft.Json": "8.0.1",
+          "System.ComponentModel.Annotations": "4.0.11-beta-23516",
           "System.IO": "4.0.11-beta-23516",
           "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Linq.Expressions": "4.0.11",
-          "System.Net.Http": "4.0.1",
-          "System.Runtime.Extensions": "4.0.11",
+          "System.Linq.Expressions": "4.0.11-beta-23516",
+          "System.Net.Http": "4.0.1-beta-23516",
+          "System.Runtime.Extensions": "4.0.11-beta-23516",
+          "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516",
           "System.Runtime.Serialization.Xml": "4.1.0-beta-23516"
         }
       }
@@ -804,7 +805,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
@@ -1617,18 +1618,19 @@
           "lib/DNXCore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Telebot/2.0.4": {
+      "Telebot/2.1.0": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
-          "Newtonsoft.Json": "7.0.1",
-          "System.ComponentModel.Annotations": "4.0.11",
+          "Newtonsoft.Json": "8.0.1",
+          "System.ComponentModel.Annotations": "4.0.11-beta-23516",
           "System.IO": "4.0.11-beta-23516",
           "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Linq.Expressions": "4.0.11",
-          "System.Net.Http": "4.0.1",
-          "System.Runtime.Extensions": "4.0.11",
+          "System.Linq.Expressions": "4.0.11-beta-23516",
+          "System.Net.Http": "4.0.1-beta-23516",
+          "System.Runtime.Extensions": "4.0.11-beta-23516",
+          "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516",
           "System.Runtime.Serialization.Xml": "4.1.0-beta-23516"
         }
       }
@@ -1805,7 +1807,7 @@
           "lib/dotnet/Microsoft.Win32.Primitives.dll": {}
         }
       },
-      "Newtonsoft.Json/7.0.1": {
+      "Newtonsoft.Json/8.0.1": {
         "type": "package",
         "compile": {
           "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll": {}
@@ -2618,25 +2620,26 @@
           "lib/DNXCore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Telebot/2.0.4": {
+      "Telebot/2.1.0": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
           "Microsoft.AspNet.WebApi.Client": "5.2.3",
-          "Newtonsoft.Json": "7.0.1",
-          "System.ComponentModel.Annotations": "4.0.11",
+          "Newtonsoft.Json": "8.0.1",
+          "System.ComponentModel.Annotations": "4.0.11-beta-23516",
           "System.IO": "4.0.11-beta-23516",
           "System.IO.FileSystem": "4.0.1-beta-23516",
-          "System.Linq.Expressions": "4.0.11",
-          "System.Net.Http": "4.0.1",
-          "System.Runtime.Extensions": "4.0.11",
+          "System.Linq.Expressions": "4.0.11-beta-23516",
+          "System.Net.Http": "4.0.1-beta-23516",
+          "System.Runtime.Extensions": "4.0.11-beta-23516",
+          "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516",
           "System.Runtime.Serialization.Xml": "4.1.0-beta-23516"
         }
       }
     }
   },
   "libraries": {
-    "Telebot/2.0.4": {
+    "Telebot/2.1.0": {
       "type": "project",
       "path": "../Telebot/project.json"
     },
@@ -3015,9 +3018,9 @@
         "ref/xamarinmac20/_._"
       ]
     },
-    "Newtonsoft.Json/7.0.1": {
+    "Newtonsoft.Json/8.0.1": {
       "type": "package",
-      "sha512": "q3V4KLetMLnt1gpAVWgtXnHjKs0UG/RalBc29u2ZKxd5t5Ze4JBL5WiiYIklJyK/5CRiIiNwigVQUo0FgbsuWA==",
+      "sha512": "qFzqzune1D7hDz8kNavFwrJ0fv8qkwANGyUOPjP0I67DmNH04nmSCRB0g0LCIqogMKrBXjsiP43Z0E1huBvxOg==",
       "files": [
         "lib/net20/Newtonsoft.Json.dll",
         "lib/net20/Newtonsoft.Json.xml",
@@ -3031,8 +3034,8 @@
         "lib/portable-net40+sl5+wp80+win8+wpa81/Newtonsoft.Json.xml",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.dll",
         "lib/portable-net45+wp80+win8+wpa81+dnxcore50/Newtonsoft.Json.xml",
-        "Newtonsoft.Json.7.0.1.nupkg",
-        "Newtonsoft.Json.7.0.1.nupkg.sha512",
+        "Newtonsoft.Json.8.0.1.nupkg",
+        "Newtonsoft.Json.8.0.1.nupkg.sha512",
         "Newtonsoft.Json.nuspec",
         "tools/install.ps1"
       ]
@@ -5095,8 +5098,8 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Telebot >= 2.0.4",
-      "Newtonsoft.Json >= 7.0.1",
+      "Telebot >= 2.1.0",
+      "Newtonsoft.Json >= 8.0.1",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration >= 1.0.0-rc1-final"
     ],

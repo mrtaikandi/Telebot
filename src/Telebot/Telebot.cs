@@ -4,7 +4,7 @@
     using System.Collections.Generic;
     using System.Globalization;
     using System.IO;
-    using System.Net;
+    using System.Linq;
     using System.Net.Http;
     using System.Text;
     using System.Threading;
@@ -12,13 +12,11 @@
 
     using JetBrains.Annotations;
 
-    using Newtonsoft.Json;
-
     using Taikandi.Telebot.Types;
 
     using File = Taikandi.Telebot.Types.File;
 
-    public class Telebot : IDisposable
+    public partial class Telebot : IDisposable
     {
         #region Fields
 
@@ -59,6 +57,56 @@
         #region Public Methods and Operators
 
         /// <summary>
+        /// Sends answers to an inline query.
+        /// </summary>
+        /// <param name="inlineQueryId">Unique identifier for answered query.</param>
+        /// <param name="results">Results of the inline query.</param>
+        /// <param name="cacheTime">The maximum amount of time in seconds the result of the inline query may be cached on the Telegram
+        /// server. Default is 300.</param>
+        /// <param name="isPersonal"><c>true</c>, to cache the results on the Telegram server only for the user that sent the query. By
+        /// default, results may be returned to any user who sends the same query.</param>
+        /// <param name="nextOffset">The offset that a client should send in the next query with the same text to receive more results.
+        /// <c>null</c> or <see cref="string.Empty" /> if there are no more results or if you don't support
+        /// pagination. Offset length can't exceed 64 bytes.</param>
+        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.</param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>true</c> if the
+        /// answer successfully sent; otherwise <c>false</c>.
+        /// </returns>        
+        /// <exception cref="ArgumentException">No more than 50 results per query are allowed.</exception>
+        /// <exception cref="System.ArgumentNullException"><paramref name="inlineQueryId" /> is null -or- <paramref name="results" /> is null.</exception>
+        /// <exception cref="System.ArgumentException">The nextOffset argument must be less than 64 bytes.</exception>
+        public async Task<bool> AnswerInlineQueryAsync(long inlineQueryId, [NotNull] IEnumerable<InlineQueryResult> results, int cacheTime = 300, bool isPersonal = false, string nextOffset = null, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            if( inlineQueryId <= 0 )
+                throw new ArgumentException("The value must be greater than zero.", nameof(inlineQueryId));
+
+            if( results == null )
+                throw new ArgumentNullException(nameof(results));
+
+            var inlineQueryResults = results as IList<InlineQueryResult> ?? results.ToList();
+            if( inlineQueryResults.Count > 50 )
+                throw new ArgumentException("No more than 50 results per query are allowed.", nameof(results));
+
+            var parameters = new MultipartFormDataContent();
+
+            if( !string.IsNullOrWhiteSpace(nextOffset) )
+            {
+                ExceptionHelper.ValidateArgumentByteCount(nameof(nextOffset), nextOffset);
+
+                parameters.Add("next_offset", nextOffset);
+            }
+
+            parameters.Add("inline_query_id", inlineQueryId);
+            parameters.Add("results", inlineQueryResults);
+            parameters.AddIf(isPersonal, "is_peronal", isPersonal);
+            parameters.AddIf(cacheTime != 300, "cache_time", cacheTime);
+
+            return await this.CallTelegramMethodAsync("answerInlineQuery", parameters, cancellationToken).ConfigureAwait(false);
+        }
+
+        /// <summary>
         /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged
         /// resources.
         /// </summary>
@@ -84,7 +132,9 @@
         /// A cancellation token that can be used by other objects or threads to receive notice of
         /// cancellation.
         /// </param>
-        /// <exception cref="InvalidOperationException">File already exists in the destination path but overwrite parameter is set to <c>false</c>.</exception>
+        /// <exception cref="InvalidOperationException">
+        /// File already exists in the destination path but overwrite parameter is set to <c>false</c>.
+        /// </exception>
         /// <exception cref="ArgumentNullException">file cannot be null | fullPath cannot be null.</exception>
         /// <returns>A task that represents the asynchronous operation.</returns>
         public async Task DownloadFile([NotNull] File file, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
@@ -95,16 +145,16 @@
             if( string.IsNullOrWhiteSpace(fullPath) )
                 throw new ArgumentNullException(nameof(fullPath));
 
-            if( System.IO.File.Exists(fullPath))
+            if( System.IO.File.Exists(fullPath) )
             {
-                if(!overwrite)
-                throw new InvalidOperationException($"File \"{fullPath}\" already exists.");
+                if( !overwrite )
+                    throw new InvalidOperationException($"File \"{fullPath}\" already exists.");
 
                 System.IO.File.Delete(fullPath);
             }
-                        
+
             using( var response = await this.DownloadFile(file, cancellationToken).ConfigureAwait(false) )
-            {                
+            {
                 using( var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None) )
                 {
                     await response.CopyToAsync(fileStream, 81920, cancellationToken).ConfigureAwait(false);
@@ -157,7 +207,11 @@
             if( chatId == null )
                 throw new ArgumentNullException(nameof(chatId));
 
-            var parameters = new NameValueCollection { { "from_chat_id", fromChatId }, { "message_id", messageId.ToString() } };
+            var parameters = new NameValueCollection
+                                 {
+                                     { "from_chat_id", fromChatId },
+                                     { "message_id", messageId.ToString() }
+                                 };
 
             return await this.CallTelegramMethodAsync("forwardMessage", parameters, chatId, cancellationToken).ConfigureAwait(false);
         }
@@ -474,16 +528,18 @@
             if( audioStream == null )
                 throw new ArgumentNullException(nameof(audioStream));
 
-            var content = new MultipartFormDataContent { { new StreamContent(audioStream), "audio", fileName } };
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var content = new MultipartFormDataContent();
+            content.Add("audio", audioStream, fileName);
 
             if( duration > 0 )
-                content.Add(new StringContent(duration.ToString()), "duration");
+                content.Add("duration", duration.ToString());
 
             if( performer != null )
-                content.Add(new StringContent(performer), "performer");
+                content.Add("performer", performer);
 
             if( title != null )
-                content.Add(new StringContent(title), "title");
+                content.Add("title", title);
 
             return await this.CallTelegramMethodAsync("sendAudio", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -765,7 +821,10 @@
             if( documentStream == null )
                 throw new ArgumentNullException(nameof(documentStream));
 
-            var content = new MultipartFormDataContent { { new StreamContent(documentStream), "document", fileName } };
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var content = new MultipartFormDataContent();
+            content.Add("document", documentStream, fileName);
+
             return await this.CallTelegramMethodAsync("sendDocument", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
 
@@ -912,7 +971,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendMessageAsync(long chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendMessageAsync(long chatId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendMessageAsync(chatId.ToString(), text, parseMode, disableWebPagePreview, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -943,7 +1002,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public async Task<Message> SendMessageAsync([NotNull] string chatId, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Message> SendMessageAsync([NotNull] string chatId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( chatId == null )
                 throw new ArgumentNullException(nameof(chatId));
@@ -954,10 +1013,10 @@
             var parameters = new NameValueCollection { { "text", text } };
 
             if( disableWebPagePreview )
-                parameters.Add("disable_web_page_preview", "true");
+                parameters.Add("disable_web_page_preview", true);
 
-            if( parseMode != null && parseMode != ParseMode.Normal )
-                parameters.Add("parse_mode", parseMode.Value);
+            if( parseMode != ParseMode.Normal )
+                parameters.Add("parse_mode", ParseMode.Markdown.ToString());
 
             return await this.CallTelegramMethodAsync("sendMessage", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -986,7 +1045,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendMessageAsync(Message message, [NotNull] string text, ParseMode parseMode = null, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendMessageAsync(Message message, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendMessageAsync(message.Chat.Id.ToString(), text, parseMode, disableWebPagePreview, message.ReplyToMessage?.Id ?? 0, replyMarkup ?? new ReplyKeyboardHide(), cancellationToken);
         }
@@ -1121,10 +1180,12 @@
             if( photoStream == null )
                 throw new ArgumentNullException(nameof(photoStream));
 
-            var content = new MultipartFormDataContent { { new StreamContent(photoStream), "photo", fileName } };
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var content = new MultipartFormDataContent();
+            content.Add("photo", fileName);
 
             if( !string.IsNullOrWhiteSpace(caption) )
-                content.Add(new StringContent(caption), "caption");
+                content.Add("caption", caption);
 
             return await this.CallTelegramMethodAsync("sendPhoto", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1311,7 +1372,9 @@
             if( stickerStream == null )
                 throw new ArgumentNullException(nameof(stickerStream));
 
-            var content = new MultipartFormDataContent { { new StreamContent(stickerStream), "sticker", fileName } };
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var content = new MultipartFormDataContent();
+            content.Add("sticker", stickerStream, fileName);
 
             return await this.CallTelegramMethodAsync("sendSticker", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1450,7 +1513,7 @@
 
             var parameters = new NameValueCollection { { "video", videoId } };
             if( duration > 0 )
-                parameters.Add("duration", duration.ToString());
+                parameters.Add("duration", duration);
 
             if( caption != null )
                 parameters.Add("caption", caption);
@@ -1528,10 +1591,10 @@
 
             var content = new MultipartFormDataContent { { new StreamContent(videoStream), "video", fileName } };
             if( duration > 0 )
-                content.Add(new StringContent(duration.ToString()), "duration");
+                content.Add("duration", duration);
 
             if( caption != null )
-                content.Add(new StringContent(caption), "caption");
+                content.Add("caption", caption);
 
             return await this.CallTelegramMethodAsync("sendVideo", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1679,7 +1742,7 @@
             var parameters = new NameValueCollection { { "voice", voice } };
 
             if( duration > 0 )
-                parameters.Add("duration", duration.ToString());
+                parameters.Add("duration", duration);
 
             return await this.CallTelegramMethodAsync("sendVoice", parameters, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1756,9 +1819,12 @@
             if( voiceStream == null )
                 throw new ArgumentNullException(nameof(voiceStream));
 
-            var content = new MultipartFormDataContent { { new StreamContent(voiceStream), "voice", fileName } };
+            // ReSharper disable once UseObjectOrCollectionInitializer
+            var content = new MultipartFormDataContent();
+            content.Add("voice", voiceStream, fileName);
+
             if( duration > 0 )
-                content.Add(new StringContent(duration.ToString()), "duration");
+                content.Add("duration", duration);
 
             return await this.CallTelegramMethodAsync("sendVoice", content, chatId, replyToMessageId, replyMarkup, cancellationToken).ConfigureAwait(false);
         }
@@ -1892,140 +1958,11 @@
                 {
                     var fileName = Path.GetFileName(certificatePath);
                     var fileStream = System.IO.File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    content.Add(new StreamContent(fileStream), "certificate", fileName);
-                    content.Add(new StringContent(url), "url");
+                    content.Add("certificate", fileStream, fileName);
+                    content.Add("url", url);
 
                     var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
                     EnsureSuccessStatusCode(response);
-                }
-            }
-        }
-
-        #endregion
-
-        #region Methods
-
-        /// <summary>
-        /// Creates a new instance of <see cref="HttpClient" /> to connect to the Telegram bot API.
-        /// </summary>
-        /// <returns>
-        /// A new instance of <see cref="HttpClient" /> configured to connect to the Telegram bot API.
-        /// </returns>
-        protected virtual HttpClient CreateHttpClient()
-        {
-            var client = new HttpClient { BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute) };
-
-            return client;
-        }
-
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing">
-        /// <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged
-        /// resources.
-        /// </param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if( !this._disposedValue )
-            {
-                if( disposing )
-                {
-                    // dispose managed state (managed objects).
-                    this.Client.Dispose();
-                }
-
-                // free unmanaged resources (unmanaged objects) and override a finalizer below.
-                // set large fields to null.
-                this._client = null;
-                this._disposedValue = true;
-            }
-        }
-
-        private static void EnsureSuccessStatusCode(HttpResponseMessage response)
-        {
-            if( response.IsSuccessStatusCode )
-                return;
-
-            if( response.StatusCode == HttpStatusCode.BadGateway )
-                throw new ServiceUnavailableException();
-
-            throw new HttpRequestException(response);
-        }
-
-        private static async Task<T> ReadTelegramResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            if( response.IsSuccessStatusCode )
-            {
-                var telegramResponse = await response.Content.ReadAsAsync<TelegramResponse<T>>(cancellationToken).ConfigureAwait(false);
-                return telegramResponse.Result;
-            }
-
-            if( response.StatusCode == HttpStatusCode.BadGateway )
-                throw new ServiceUnavailableException();
-
-            throw new HttpRequestException(response);
-        }
-
-        private Task<Message> CallTelegramMethodAsync(string url, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
-        {
-            return this.CallTelegramMethodAsync<Message>(url, parameters, chatId, replyToMessageId, replyMarkup, cancellationToken);
-        }
-
-        private Task<Message> CallTelegramMethodAsync(string url, NameValueCollection parameters, string chatId, CancellationToken cancellationToken)
-        {
-            return this.CallTelegramMethodAsync<Message>(url, parameters, chatId, -1, null, cancellationToken);
-        }
-
-        private Task<T> CallTelegramMethodAsync<T>(string url, CancellationToken cancellationToken)
-        {
-            return this.CallTelegramMethodAsync<T>(url, null, null, -1, null, cancellationToken);
-        }
-
-        private async Task<T> CallTelegramMethodAsync<T>(string url, NameValueCollection parameters, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
-        {
-            if( !string.IsNullOrWhiteSpace(chatId) )
-                parameters.Add("chat_id", chatId);
-
-            if( replyToMessageId > 0 )
-                parameters.Add("reply_to_message_id", replyToMessageId.ToString());
-
-            if( replyMarkup != null )
-                parameters.Add("reply_markup", JsonConvert.SerializeObject(replyMarkup));
-
-            if( parameters == null )
-            {
-                using( var response = await this.Client.GetAsync(url, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<T>(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
-
-            using( var content = new FormUrlEncodedContent(parameters) )
-            {
-                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<T>(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
-        }
-
-        private async Task<Message> CallTelegramMethodAsync([NotNull] string url, MultipartFormDataContent content, string chatId, long replyToMessageId, IReply replyMarkup, CancellationToken cancellationToken)
-        {
-            using( content )
-            {
-                if( !string.IsNullOrWhiteSpace(chatId) )
-                    content.Add(new StringContent(chatId), "chat_id");
-
-                if( replyToMessageId >= 0 )
-                    content.Add(new StringContent(replyToMessageId.ToString()), "reply_to_message_id");
-
-                if( replyMarkup != null )
-                    content.Add(new StringContent(JsonConvert.SerializeObject(replyMarkup)), "reply_markup");
-
-                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<Message>(response, cancellationToken).ConfigureAwait(false);
                 }
             }
         }

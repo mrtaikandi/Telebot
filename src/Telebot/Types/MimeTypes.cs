@@ -1,17 +1,14 @@
 ﻿namespace Taikandi.Telebot.Types
 {
-    using System;
-
-    /// <summary>Provides list of supported chat types.</summary>
-    public sealed class ChatType
+    public sealed class MimeTypes
     {
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ChatType" /> class.
+        /// Initializes a new instance of the <see cref="MimeTypes" /> class.
         /// </summary>
         /// <param name="value">The value of the property.</param>
-        private ChatType(string value)
+        private MimeTypes(string value)
         {
             this.Value = value;
         }
@@ -20,25 +17,9 @@
 
         #region Public Properties
 
-        /// <summary>
-        /// Gets a value indicating that the chat is a channel.
-        /// </summary>
-        public static ChatType Channel => new ChatType("channel");
+        public static MimeTypes TextHtml => new MimeTypes("text/html");
 
-        /// <summary>
-        /// Gets a value indicating that the chat is a group chat.
-        /// </summary>
-        public static ChatType Group => new ChatType("group");
-
-        /// <summary>
-        /// Gets a value indicating that the chat is a private chat.
-        /// </summary>
-        public static ChatType Private => new ChatType("private");
-
-        /// <summary>
-        /// Gets a value indicating that the chat is a supergroup chat.
-        /// </summary>
-        public static ChatType Supergroup => new ChatType("supergroup");
+        public static MimeTypes VideoMp4 => new MimeTypes("video/mp4");
 
         public string Value { get; }
 
@@ -46,7 +27,7 @@
 
         #region Public Methods and Operators
 
-        public static bool operator ==(ChatType a, ChatType b)
+        public static bool operator ==(MimeTypes a, MimeTypes b)
         {
             // If both are null, or both are same instance, return true.
             if( ReferenceEquals(a, b) )
@@ -63,40 +44,16 @@
         }
 
         /// <summary>
-        /// Performs an implicit conversion from <see cref="ChatType" /> to <see cref="System.String" />.
+        /// Performs an implicit conversion from <see cref="MimeTypes" /> to <see cref="System.String" />.
         /// </summary>
-        /// <param name="a">The <see cref="ChatType" /> to convert.</param>
+        /// <param name="a">The <see cref="MimeTypes" /> to convert.</param>
         /// <returns>The result of the conversion.</returns>
-        public static implicit operator string (ChatType a)
+        public static implicit operator string(MimeTypes a)
         {
             return a?.Value;
         }
 
-        /// <summary>
-        /// Performs an implicit conversion from <see cref="ChatType" /> to <see cref="System.String" />.
-        /// </summary>
-        /// <param name="a">The <see cref="ChatType" /> to convert.</param>
-        /// <returns>The result of the conversion.</returns>
-        public static implicit operator ChatType(string a)
-        {
-            if( string.IsNullOrWhiteSpace(a) )
-                throw new NotSupportedException();
-
-            if( a == Channel.Value )
-                return Channel;
-            if( a == Group.Value )
-                return Group;
-            if( a == Private.Value )
-                return Private;
-            if( a == Supergroup.Value )
-                return Supergroup;
-
-            throw new NotSupportedException();
-        }
-
-
-
-        public static bool operator !=(ChatType a, ChatType b)
+        public static bool operator !=(MimeTypes a, MimeTypes b)
         {
             return !(a == b);
         }
@@ -111,22 +68,22 @@
         /// <param name="obj">The object to compare with the current object.</param>
         public override bool Equals(object obj)
         {
-            var me = obj as ChatType;
+            var me = obj as MimeTypes;
             return this.Equals(me);
         }
 
         /// <summary>
-        /// Determines whether the specified <see cref="ChatType" /> is equal to the current
-        /// <see cref="ChatType" />.
+        /// Determines whether the specified <see cref="MimeTypes" /> is equal to the current
+        /// <see cref="MimeTypes" />.
         /// </summary>
         /// <returns>
-        /// <c>true</c> if the specified <see cref="ChatType" /> is equal to the current instance; otherwise,
+        /// <c>true</c> if the specified <see cref="MimeTypes" /> is equal to the current instance; otherwise,
         /// <c>false</c>.
         /// </returns>
         /// <param name="other">
-        /// The <see cref="ChatType" /> to compare with the current instance.
+        /// The <see cref="MimeTypes" /> to compare with the current instance.
         /// </param>
-        public bool Equals(ChatType other)
+        public bool Equals(MimeTypes other)
         {
             return other != null && string.Equals(this.Value, other.Value);
         }

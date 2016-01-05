@@ -3,6 +3,7 @@
     using System.ComponentModel.DataAnnotations;
 
     using Newtonsoft.Json;
+    using Newtonsoft.Json.Converters;
 
     /// <summary>This object represents a chat.</summary>
     [JsonObject(MemberSerialization.OptIn)]
@@ -36,6 +37,7 @@
         public string Title { get; set; }
 
         /// <summary>Gets or sets the type of chat.</summary>
+        [JsonConverter(typeof(StringEnumConverter))]
         [JsonProperty("type", Required = Required.Always)]
         public ChatType Type { get; set; }
 

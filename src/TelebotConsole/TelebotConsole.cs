@@ -35,13 +35,13 @@ namespace TelebotConsole
 
             // Get Telegram API key from user secrets.
             // https://docs.asp.net/en/latest/security/app-secrets.html
-            this._telegramApiKey = configuration["TelegramApiKey"];
+            this._telegramApiKey = "100639095:AAFetqG3-uHEFaBIr_tOc0Tlvgc-RTlciec"; // configuration["TelegramApiKey"];
 
             // Identifier of the first update to be returned. Must be greater by one than the highest among
             // the identifiers of previously received updates. By default, updates starting with the earliest
             // unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is
             // called with an offset higher than its update_id.
-            this._offset = 684029000;
+            this._offset = 684029274;
         }
 
         #endregion
@@ -53,55 +53,114 @@ namespace TelebotConsole
             Console.WriteLine("Running Telebot with key: {0}", this._telegramApiKey);
             this._telebot = new Telebot(this._telegramApiKey);
 
-            try
+            while( true )
             {
-                while( true )
+                try
                 {
-                    var update = (await this._telebot.GetUpdatesAsync(this._offset)).ToList();                    
-                    if( update.Any() )
+                    var updates = (await this._telebot.GetUpdatesAsync(this._offset)).ToList();
+                    if( updates.Any() )
                     {
-                        Dump(update);
-                        this._offset = update.Max(u => u.Id) + 1;
+                        this._offset = updates.Max(u => u.Id) + 1;
 
-                        foreach( var result in update )
+                        foreach( var update in updates )
                         {
-                            await this.CheckMessages(result);
+                            switch( update.Type )
+                            {
+                                case UpdateType.Message:
+                                    await this.CheckMessages(update);
+                                    break;
+                                case UpdateType.InlineQuery:
+                                    await this.CheckInlineQuery(update);
+                                    break;
+                                case UpdateType.ChosenInlineResult:
+                                    this.CheckChosenInlineResult(update);
+                                    break;
+                                default:
+                                    throw new ArgumentOutOfRangeException();
+                            }
                         }
                     }
 
                     await Task.Delay(TimeSpan.FromSeconds(1));
                 }
-            }
-            catch( Exception ex )
-            {
-                LogException(ex);
-            }
+                catch( Exception ex )
+                {
+                    LogException(ex);
 
-            Console.WriteLine("Press any key to exit.");
-            Console.Read();
+                    Console.WriteLine("Press 'Enter' to continue...");
+                    Console.ReadLine();
+
+                    WriteLine(ConsoleColor.DarkGray, "----------------------------------------------");
+                }
+            }            
+        }
+
+        private void CheckChosenInlineResult(Update update)
+        {
+            WriteLine(ConsoleColor.Blue, "Received ChosenInlineResult:");
+            Dump(update, ConsoleColor.Blue);
+        }
+
+        private async Task CheckInlineQuery(Update update)
+        {
+            WriteLine(ConsoleColor.Green, "Received InlineQuery:");
+            Dump(update, ConsoleColor.Green);
+
+            var results = new InlineQueryResult[]
+                                         {
+                                             new InlineQueryResultArticle(
+                                                     Guid.NewGuid().ToString("N"),
+                                                     "This is a title",
+                                                     "This is a message."
+                                                     ) {ParseMode = ParseMode.Markdown},
+                                             new InlineQueryResultPhoto(
+                                                     Guid.NewGuid().ToString("N"),
+                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
+                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
+                                                     ),
+                                             new InlineQueryResultGif(
+                                                     Guid.NewGuid().ToString("N"),
+                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
+                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
+                                                     )
+                                         };
+
+            var answerId = update.InlineQuery.Id;
+            WriteLine(ConsoleColor.DarkGreen, "Sending: ");
+            WriteLine(ConsoleColor.DarkGreen, $"Answer Id: {answerId}");
+            Dump(results, ConsoleColor.DarkGreen);
+
+            await this._telebot.AnswerInlineQueryAsync(answerId, results);
         }
 
         #endregion
 
         #region Methods
 
-        private static void Dump<TResult>(TResult response)
+        private static void Dump<TResult>(TResult response, ConsoleColor color = ConsoleColor.White)
         {
-            var serializedResult = JsonConvert.SerializeObject(response, Formatting.Indented);
-            Console.Write(serializedResult);
+            var serializedResult = JsonConvert.SerializeObject(response, Formatting.Indented, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+            WriteLine(color, serializedResult);
         }
 
-        private static void LogException(Exception ex)
+        private static void WriteLine(ConsoleColor color, string message)
         {
-            Console.ForegroundColor = ConsoleColor.Red;
-            Console.WriteLine(ex);
+            Console.ForegroundColor = color;
+            Console.WriteLine(message);
 
             Console.ResetColor();
         }
 
+        private static void LogException(Exception ex)
+        {
+            WriteLine(ConsoleColor.Red, ex.ToString());
+        }
+
         private Task CheckMessages(Update update)
         {
-            if( string.IsNullOrWhiteSpace(update.Message.Text) )
+            Dump(update);
+
+            if( string.IsNullOrWhiteSpace(update.Message?.Text) )
                 return Task.FromResult(0);
 
             var message = update.Message.Text.ToLowerInvariant();
