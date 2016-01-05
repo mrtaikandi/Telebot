@@ -1,7 +1,7 @@
 {
   "title": "Telebot",
   "version": "2.1.0",
-  "description": "Telegram Bot API client library for .NET.",
+  "description": "Telegram Bot API client library for .NET that supports both bot APIs and inline bot APIs.",
   "authors": [ "Mohammadreza Taikandi" ],
   "tags": [ "telegram", ".net telegram bot" ],
   "projectUrl": "https://github.com/mrtaikandi/Telebot",
