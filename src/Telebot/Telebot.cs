@@ -117,10 +117,10 @@
         }
 
         /// <summary>
-        /// Downloads the file requested by the <see cref="GetFile(string, CancellationToken)" /> method.
+        /// Downloads the file requested by the <see cref="GetFileAsync(string,System.Threading.CancellationToken)" /> method.
         /// </summary>
         /// <param name="file">
-        /// The file info received by calling <see cref="GetFile(string, CancellationToken)" />.
+        /// The file info received by calling <see cref="GetFileAsync(string,System.Threading.CancellationToken)" />.
         /// </param>
         /// <param name="fullPath">
         /// The full directory and file name to the location where the downloaded file should be saved.
@@ -137,7 +137,7 @@
         /// </exception>
         /// <exception cref="ArgumentNullException">file cannot be null | fullPath cannot be null.</exception>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task DownloadFile([NotNull] File file, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task DownloadFileAsync([NotNull] File file, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( file == null )
                 throw new ArgumentNullException(nameof(file));
@@ -153,7 +153,7 @@
                 System.IO.File.Delete(fullPath);
             }
 
-            using( var response = await this.DownloadFile(file, cancellationToken).ConfigureAwait(false) )
+            using( var response = await this.DownloadFileAsync(file, cancellationToken).ConfigureAwait(false) )
             {
                 using( var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write, FileShare.None) )
                 {
@@ -163,10 +163,10 @@
         }
 
         /// <summary>
-        /// Downloads the file requested by the <see cref="GetFile(string, CancellationToken)" /> method.
+        /// Downloads the file requested by the <see cref="GetFileAsync(string,System.Threading.CancellationToken)" /> method.
         /// </summary>
         /// <param name="file">
-        /// The file info received by calling <see cref="GetFile(string, CancellationToken)" />.
+        /// The file info received by calling <see cref="GetFileAsync(string,System.Threading.CancellationToken)" />.
         /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token that can be used by other objects or threads to receive notice of
@@ -176,7 +176,7 @@
         /// <returns>
         /// Returns a task containing the downloaded file as a stream.
         /// </returns>
-        public async Task<Stream> DownloadFile([NotNull] File file, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<Stream> DownloadFileAsync([NotNull] File file, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( file == null )
                 throw new ArgumentNullException(nameof(file));
@@ -268,10 +268,10 @@
         /// cancellation.
         /// </param>
         /// <returns>A task that represents the asynchronous operation.</returns>
-        public async Task GetFile([NotNull] string fileId, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task GetFileAsync([NotNull] string fileId, [NotNull] string fullPath, bool overwrite = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            var file = await this.GetFile(fileId, cancellationToken).ConfigureAwait(false);
-            await this.DownloadFile(file, fullPath, overwrite, cancellationToken).ConfigureAwait(false);
+            var file = await this.GetFileAsync(fileId, cancellationToken).ConfigureAwait(false);
+            await this.DownloadFileAsync(file, fullPath, overwrite, cancellationToken).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -286,7 +286,7 @@
         /// <returns>
         /// On success, a <see cref="Types.File" /> object containing basic info about the file to download.
         /// </returns>
-        public async Task<File> GetFile([NotNull] string fileId, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<File> GetFileAsync([NotNull] string fileId, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( string.IsNullOrWhiteSpace(fileId) )
                 throw new ArgumentNullException(nameof(fileId));
@@ -353,7 +353,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="UserProfilePhotos" />.
         /// </returns>
-        public async Task<UserProfilePhotos> GetUserProfilePhotos(int userId, int offset = -1, int limit = 100, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<UserProfilePhotos> GetUserProfilePhotosAsync(int userId, int offset = -1, int limit = 100, CancellationToken cancellationToken = default(CancellationToken))
         {
             var builder = new StringBuilder();
             builder.AppendFormat("getUserProfilePhotos?user_id={0}&limit={1}", userId, limit);
@@ -642,13 +642,13 @@
         /// <example>
         /// The <c>ImageBot</c> needs some time to process a request and upload the image. Instead of sending a
         /// text message along the lines of "Retrieving image, please wait…", the bot may use
-        /// <see cref="SendChatAction(long, ChatAction, CancellationToken)" />
+        /// <see cref="SendChatActionAsync(long,ChatAction,CancellationToken)" />
         /// with action = upload_photo. The user will see a "sending photo" status for the bot.
         /// </example>
         /// </remarks>
-        public Task<bool> SendChatAction(long chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> SendChatActionAsync(long chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.SendChatAction(chatId.ToString(), action, cancellationToken);
+            return this.SendChatActionAsync(chatId.ToString(), action, cancellationToken);
         }
 
         /// <summary>
@@ -674,11 +674,11 @@
         /// <example>
         /// The <c>ImageBot</c> needs some time to process a request and upload the image. Instead of sending a
         /// text message along the lines of "Retrieving image, please wait…", the bot may use
-        /// <see cref="SendChatAction(string, ChatAction, CancellationToken)" />
+        /// <see cref="SendChatActionAsync(string,Taikandi.Telebot.Types.ChatAction,System.Threading.CancellationToken)" />
         /// with action = upload_photo. The user will see a "sending photo" status for the bot.
         /// </example>
         /// </remarks>
-        public async Task<bool> SendChatAction([NotNull] string chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task<bool> SendChatActionAsync([NotNull] string chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( chatId == null )
                 throw new ArgumentNullException(nameof(chatId));

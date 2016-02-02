@@ -169,7 +169,7 @@ namespace TelebotConsole
                 case "/sendphoto":
                     return this.SendPhoto(update);
                 case "/chataction":
-                    return this.SendChatAction(update);
+                    return this.SendChatActionAsync(update);
                 default:
                     return this.EchoAsync(update);
             }
@@ -192,14 +192,14 @@ namespace TelebotConsole
             await this._telebot.SendMessageAsync(message, message.Text);
         }
 
-        private Task SendChatAction(Update update)
+        private Task SendChatActionAsync(Update update)
         {
-            return this._telebot.SendChatAction(update.Message.Chat.Id.ToString(), ChatAction.Typing);
+            return this._telebot.SendChatActionAsync(update.Message.Chat.Id.ToString(), ChatAction.Typing);
         }
 
         private Task SendPhoto(Update update)
         {
-            var actionTask = this._telebot.SendChatAction(update.Message.Chat.Id.ToString(), ChatAction.UploadPhoto);
+            var actionTask = this._telebot.SendChatActionAsync(update.Message.Chat.Id.ToString(), ChatAction.UploadPhoto);
             var sendTask = this._telebot.SendPhotoFromFileAsync(update.Message.Chat.Id.ToString(), @"D:\Temp\brekeke-frog-symbol.jpg", "The Frog!");
 
             return Task.WhenAll(actionTask, sendTask);
