@@ -21,7 +21,7 @@
 
         /// <summary>Gets or sets the contact's phone number.</summary>
         [Required]
-        [JsonProperty("photo_number", Required = Required.Always)]
+        [JsonProperty("phone_number", Required = Required.Always)]
         public string PhoneNumber { get; set; }
 
         /// <summary>
