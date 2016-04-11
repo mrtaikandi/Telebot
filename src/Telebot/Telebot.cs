@@ -1182,7 +1182,7 @@
 
             // ReSharper disable once UseObjectOrCollectionInitializer
             var content = new MultipartFormDataContent();
-            content.Add("photo", fileName);
+            content.Add( new StreamContent( photoStream ), "photo", fileName );
 
             if( !string.IsNullOrWhiteSpace(caption) )
                 content.Add("caption", caption);
