@@ -45,7 +45,7 @@
         /// Gets or sets a value indicating whether to requests clients to hide the keyboard as soon as it's
         /// been used. Defaults to <c>false</c>.
         /// </summary>
-        [JsonProperty("one_time_keyboard")]
+        [JsonProperty("one_time_keyboard", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public bool OneTimeKeyboard { get; set; }
 
         /// <summary>
@@ -54,7 +54,7 @@
         /// <c>false</c>, in which case the custom keyboard is always of the same height as the app's standard
         /// keyboard.
         /// </summary>
-        [JsonProperty("resize_keyboard")]
+        [JsonProperty("resize_keyboard", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public bool ResizeKeyboard { get; set; }
 
         /// <summary>
@@ -66,7 +66,7 @@
         /// Other users in the group don’t see the keyboard.
         /// </para>
         /// </summary>
-        [JsonProperty("selective")]
+        [JsonProperty("selective", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public bool Selective { get; set; }
 
         #endregion
