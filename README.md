@@ -10,6 +10,7 @@ First, [install NuGet](http://docs.nuget.org/docs/start-here/installing-nuget). 
 
 How can I use it?
 --------------------------------
+> For Persian how-to guide, please [visit my blog](https://taikandi.com/blog/creating-telegram-bot-using-telebot/).
 
 Simply instanciate `Telebot` class and use available methods.
 `Telebot` internally uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net.http.httpclient%28v=vs.118%29.aspx) so, it is recommended not to dispose it after every request. 

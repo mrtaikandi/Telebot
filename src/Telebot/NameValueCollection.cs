@@ -57,7 +57,8 @@
         /// <param name="value">The definition associated with key.</param>
         public void AddIf(bool condition, string key, string value)
         {
-            this.Add(new KeyValuePair<string, string>(key, value));
+            if( condition )
+                this.Add( new KeyValuePair< string, string >( key, value ) );
         }
 
         #endregion
