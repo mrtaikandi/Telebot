@@ -135,7 +135,7 @@
             using( content )
             {
                 content.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);
-                content.AddIf(replyToMessageId >= 0, "reply_to_message_id", replyToMessageId.ToString());
+                content.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
                 content.AddIf(replyMarkup != null, "reply_markup", replyMarkup);
 
                 using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
