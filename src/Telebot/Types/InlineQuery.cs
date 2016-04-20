@@ -14,6 +14,7 @@
         #region Public Properties
 
         /// <summary>Gets or sets the sender of the query.</summary>
+        [Required]
         [JsonProperty("from", Required = Required.Always)]
         public User From { get; set; }
 
@@ -22,7 +23,7 @@
         /// </summary>
         [Range(Common.IdentifierMinValue, long.MaxValue)]
         [JsonProperty("id", Required = Required.AllowNull)]
-        public long Id { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Gets or sets the offset of the results to be returned, can be controlled by the bot.
@@ -34,6 +35,11 @@
         [JsonProperty("query")]
         public string Query { get; set; }
 
+        /// <summary>
+        /// Gets or sets the sender location, only for bots that request user location.
+        /// </summary>
+        [JsonProperty("location")]
+        public Location Location { get; set; }
         #endregion
     }
 }

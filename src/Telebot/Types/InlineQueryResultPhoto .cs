@@ -6,49 +6,19 @@
 
     /// <summary>
     /// Represents a link to a photo. By default, this photo will be sent by the user with optional
-    /// caption. Alternatively, you can provide <see cref="MessageText" /> to send it instead of photo.
+    /// caption. Alternatively, you can provide <see cref="InlineQueryResult.MessageContent" /> to send it instead of photo.
     /// </summary>
+    /// <seealso cref="Taikandi.Telebot.Types.InlineQueryResult" />
     [JsonObject(MemberSerialization.OptIn)]
     public class InlineQueryResultPhoto : InlineQueryResult
     {
-        #region Constructors and Destructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InlineQueryResultPhoto" /> class.
-        /// </summary>
-        public InlineQueryResultPhoto()
-            : this(null, null, null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InlineQueryResultPhoto" /> class.
-        /// </summary>
-        /// <param name="id">
-        /// The unique identifier of this result. Must be less than 64 bytes.
-        /// </param>
-        /// <param name="url">
-        /// A valid URL of the photo. Photo size must not exceed 5MB.
-        /// </param>
-        /// <param name="thumbnailUrl">
-        /// The URL of the thumbnail for the result either in <c>.jpeg</c> or <c>.gif</c> format.
-        /// </param>
-        public InlineQueryResultPhoto(string id, string url, string thumbnailUrl)
-        {
-            ExceptionHelper.ValidateArgumentByteCount(nameof(id), id);
-
-            this.Id = id;
-            this.Url = url;
-            this.ThumbnailUrl = thumbnailUrl;
-        }
-
-        #endregion
-
         #region Public Properties
 
         /// <summary>
         /// Gets or sets the maximum of 200 character caption of the image file to be sent (Optional).
         /// </summary>
-        [JsonProperty("caption")]
         [StringLength(200)]
+        [JsonProperty("caption")]
         public string Caption { get; set; }
 
         /// <summary>
@@ -60,13 +30,6 @@
         /// <summary>Gets or sets the height of the photo (Optional).</summary>
         [JsonProperty("photo_height")]
         public int Height { get; set; }
-
-        /// <summary>
-        /// Gets or sets the text of a message to be sent instead of the photo (Optional).
-        /// </summary>
-        [StringLength(512)]
-        [JsonProperty("message_text")]
-        public string MessageText { get; set; }
 
         /// <summary>
         /// Gets or sets the mime type of the photo, defaults to image/jpeg (Optional).

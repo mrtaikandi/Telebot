@@ -92,7 +92,7 @@ namespace TelebotConsole
 
                     WriteLine(ConsoleColor.DarkGray, "----------------------------------------------");
                 }
-            }            
+            }
         }
 
         private void CheckChosenInlineResult(Update update)
@@ -106,24 +106,29 @@ namespace TelebotConsole
             WriteLine(ConsoleColor.Green, "Received InlineQuery:");
             Dump(update, ConsoleColor.Green);
 
-            var results = new InlineQueryResult[]
-                                         {
-                                             new InlineQueryResultArticle(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "This is a title",
-                                                     "This is a message."
-                                                     ) {ParseMode = ParseMode.Markdown},
-                                             new InlineQueryResultPhoto(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
-                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
-                                                     ),
-                                             new InlineQueryResultGif(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
-                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
-                                                     )
-                                         };
+    var articleResult = new InlineQueryResultArticle
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Title = "This is a title",
+        Url = "https://core.telegram.org/bots/api#inlinequeryresultarticle"
+    };
+    
+    var photoResult = new InlineQueryResultPhoto
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
+        ThumbnailUrl = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
+    };
+    
+    
+    var gifResult = new InlineQueryResultGif
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
+        ThumbnailUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
+    };
+    
+    var results = new InlineQueryResult[] { articleResult, photoResult, gifResult };
 
             var answerId = update.InlineQuery.Id;
             WriteLine(ConsoleColor.DarkGreen, "Sending: ");

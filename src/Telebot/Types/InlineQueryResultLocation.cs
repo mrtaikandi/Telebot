@@ -5,32 +5,33 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Represents a result which is a link to an article or web page.
+    /// Represents a location on a map. By default, the location will be sent by the user. Alternatively,
+    /// you can use <see cref="InlineQueryResult.MessageContent" /> to send a message with the specified
+    /// content instead of the location.
     /// </summary>
     /// <seealso cref="Taikandi.Telebot.Types.InlineQueryResult" />
+    /// <remarks>
+    /// This will only work in Telegram versions released after 9 April, 2016. Older clients will ignore
+    /// them.
+    /// </remarks>
     [JsonObject(MemberSerialization.OptIn)]
-    public class InlineQueryResultArticle : InlineQueryResult
+    public class InlineQueryResultLocation : InlineQueryResult
     {
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets a short description of the result (Optional).
-        /// </summary>
-        [JsonProperty("description")]
-        public string Description { get; set; }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether to hide the URL in the message.
-        /// </summary>
-        [JsonProperty("hide_url")]
-        public bool HideUrl { get; set; }
-
-        /// <summary>
-        /// Gets or sets the content of the message to be sent.
+        /// Gets or sets the latitude of the location in degrees.
         /// </summary>
         [Required]
-        [JsonProperty("input_message_content", Required = Required.Always)]        
-        public override InputMessageContent MessageContent { get; set; }
+        [JsonProperty("latitude", Required = Required.Always)]
+        public float Latitude { get; set; }
+
+        /// <summary>
+        /// Gets or sets the longitude of the location in degrees.
+        /// </summary>
+        [Required]
+        [JsonProperty("longitude", Required = Required.Always)]
+        public float Longitude { get; set; }
 
         /// <summary>
         /// Gets or sets the height of the thumbnail (Optional).
@@ -39,8 +40,7 @@
         public string ThumbnailHeight { get; set; }
 
         /// <summary>
-        /// Gets or sets the URL of the thumbnail for the result either in <c>.jpeg</c> or <c>.gif</c> format
-        /// (Optional).
+        /// Gets or sets the URL of the thumbnail for the result (Optional).
         /// </summary>
         [JsonProperty("thumb_url")]
         public string ThumbnailUrl { get; set; }
@@ -56,12 +56,8 @@
         [JsonProperty("title", Required = Required.Always)]
         public string Title { get; set; }
 
-        /// <summary>Gets or sets the type of the result.</summary>
-        public override InlineQueryResultType Type => InlineQueryResultType.Article;
-
-        /// <summary>Gets or sets the URL of the result (Optional).</summary>
-        [JsonProperty("url")]
-        public string Url { get; set; }
+        /// <summary>Gets the type of the result.</summary>
+        public override InlineQueryResultType Type => InlineQueryResultType.Location;
 
         #endregion
     }

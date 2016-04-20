@@ -6,11 +6,20 @@
 
     using Newtonsoft.Json;
 
-    /// <summary>This object represents an incoming update.</summary>
+    /// <summary>Represents an incoming update.</summary>
+    /// <remarks>
+    /// Only one of the optional parameters can be present in any given update.
+    /// </remarks>
     [JsonObject(MemberSerialization.OptIn)]
     public class Update
     {
         #region Public Properties
+
+        /// <summary>
+        /// Gets or sets the new incoming callback query (Optional).
+        /// </summary>
+        [JsonProperty("callback_query", Required = Required.Default)]
+        public CallbackQuery CallbackQuery { get; set; }
 
         /// <summary>
         /// Gets or sets the result of an inline query that was chosen by a user and sent to their chat partner

@@ -36,10 +36,10 @@
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets an array of button rows, each represented by an array of strings
+        /// Gets or sets an array of button rows, each represented by an array of <see cref="KeyboardButton"/>s.
         /// </summary>
         [JsonProperty("keyboard", Required = Required.Always)]
-        public string[][] Keyboard { get; set; }
+        public KeyboardButton[][] Keyboard { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether to requests clients to hide the keyboard as soon as it's
@@ -90,22 +90,43 @@
         /// </returns>
         public static ReplyKeyboardMarkup CreateReplyKeyboardMarkup(IEnumerable<string> keyboardTitles, bool oneTimeKeyboard = true, bool selective = true)
         {
-            var tiles = keyboardTitles as IList<string> ?? keyboardTitles.ToList();
+            var buttons = keyboardTitles.Select(s => new KeyboardButton(s));
+            return CreateReplyKeyboardMarkup(buttons, oneTimeKeyboard, selective);
+        }
+
+        /// <summary>
+        /// Creates a <see cref="ReplyKeyboardMarkup" /> filled with the specified
+        /// <paramref name="keyboardButtons" />.
+        /// </summary>
+        /// <param name="keyboardButtons">The keyboard buttons.</param>
+        /// <param name="oneTimeKeyboard">
+        /// If set to <c>true</c> requests clients to hide the keyboard as soon as it's been used. Defaults to
+        /// <c>true</c>.
+        /// </param>
+        /// <param name="selective">
+        /// If set to <c>true</c> hides custom keyboard for specific users only. Defaults to <c>true</c>.
+        /// </param>
+        /// <returns>
+        /// A <see cref="ReplyKeyboardMarkup" /> filled with the specified <paramref name="keyboardButtons" />.
+        /// </returns>
+        public static ReplyKeyboardMarkup CreateReplyKeyboardMarkup(IEnumerable<KeyboardButton> keyboardButtons, bool oneTimeKeyboard = true, bool selective = true)
+        {
+            var buttons = keyboardButtons as IList<KeyboardButton> ?? keyboardButtons.ToList();
             var markup = new ReplyKeyboardMarkup(oneTimeKeyboard, selective);
-            var totalRows = (int)Math.Ceiling(tiles.Count / 2d);
-            markup.Keyboard = new string[totalRows][];
+            var totalRows = (int)Math.Ceiling(buttons.Count / 2d);
+            markup.Keyboard = new KeyboardButton[totalRows][];
 
             var i = 0;
-            foreach( var title in tiles )
+            foreach( var button in buttons )
             {
                 var index = (int)(i / 2f);
                 if( i % 2 != 0 )
-                    markup.Keyboard[index][1] = title;
+                    markup.Keyboard[index][1] = button;
                 else
                 {
-                    markup.Keyboard[index] = new string[2];
-                    markup.Keyboard[index][0] = title;
-                    markup.Keyboard[index][1] = string.Empty;
+                    markup.Keyboard[index] = new KeyboardButton[2];
+                    markup.Keyboard[index][0] = button;
+                    markup.Keyboard[index][1] = null;
                 }
 
                 i++;
