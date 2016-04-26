@@ -70,7 +70,7 @@
         /// <returns>
         /// A task that represents the asynchronous operation. The task results contains the edited <see cref="Message" /> on success.
         /// </returns>
-        private Task<Message> EditMessageTextAsync(string chatId, int messageId, string inlineMessageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        private Task<Message> EditMessageTextAsync(string chatId, long messageId, string inlineMessageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(text, nameof(text));
 
@@ -97,7 +97,7 @@
         /// <returns>
         /// A task that represents the asynchronous operation. On success the task results contains the edited Message is returned.
         /// </returns>
-        private Task<Message> EditMessageCaptionAsync(string chatId, int messageId, string inlineMessageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        private Task<Message> EditMessageCaptionAsync(string chatId, long messageId, string inlineMessageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(caption, nameof(caption));
 
@@ -121,7 +121,7 @@
         /// <returns>
         /// A task that represents the asynchronous operation. On success the task results contains the edited Message is returned.
         /// </returns>
-        private Task<Message> EditMessageReplyMarkupAsync(string chatId, int messageId, string inlineMessageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        private Task<Message> EditMessageReplyMarkupAsync(string chatId, long messageId, string inlineMessageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             var parameters = new NameValueCollection();
             parameters.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);

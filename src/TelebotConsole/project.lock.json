@@ -616,7 +616,7 @@
           "ref/dotnet/System.Threading.Tasks.dll": {}
         }
       },
-      "Telebot/3.0.0": {
+      "Telebot/3.0.1": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -1618,7 +1618,7 @@
           "lib/DNXCore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Telebot/3.0.0": {
+      "Telebot/3.0.1": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -2620,7 +2620,7 @@
           "lib/DNXCore50/System.Xml.XmlSerializer.dll": {}
         }
       },
-      "Telebot/3.0.0": {
+      "Telebot/3.0.1": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -2639,7 +2639,7 @@
     }
   },
   "libraries": {
-    "Telebot/3.0.0": {
+    "Telebot/3.0.1": {
       "type": "project",
       "path": "../Telebot/project.json"
     },
@@ -5098,7 +5098,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Telebot >= 3.0.0",
+      "Telebot >= 3.0.1",
       "Newtonsoft.Json >= 8.0.1",
       "Microsoft.Extensions.Configuration.UserSecrets >= 1.0.0-rc1-final",
       "Microsoft.Extensions.Configuration >= 1.0.0-rc1-final"

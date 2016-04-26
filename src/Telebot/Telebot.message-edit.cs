@@ -32,7 +32,7 @@
         /// A task that represents the asynchronous operation. On success the task results contains the edited
         /// Message is returned.
         /// </returns>
-        public Task<Message> EditMessageCaptionAsync(long chatId, int messageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageCaptionAsync(long chatId, long messageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.EditMessageCaptionAsync(chatId.ToString(), messageId, caption, replyMarkup, cancellationToken);
@@ -59,7 +59,7 @@
         /// A task that represents the asynchronous operation. On success the task results contains the edited
         /// Message is returned.
         /// </returns>
-        public Task<Message> EditMessageCaptionAsync([NotNull] string chatId, int messageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageCaptionAsync([NotNull] string chatId, long messageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsurePositiveNumber(messageId, nameof(messageId));
@@ -110,7 +110,7 @@
         /// A task that represents the asynchronous operation. On success the task results contains the edited
         /// Message is returned.
         /// </returns>
-        public Task<Message> EditMessageReplyMarkupAsync(long chatId, int messageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageReplyMarkupAsync(long chatId, long messageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));            
             return this.EditMessageReplyMarkupAsync(chatId.ToString(), messageId, replyMarkup, cancellationToken);
@@ -135,7 +135,7 @@
         /// A task that represents the asynchronous operation. On success the task results contains the edited
         /// Message is returned.
         /// </returns>
-        public Task<Message> EditMessageReplyMarkupAsync([NotNull] string chatId, int messageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageReplyMarkupAsync([NotNull] string chatId, long messageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsurePositiveNumber(messageId, nameof(messageId));
@@ -220,7 +220,7 @@
         /// A task that represents the asynchronous operation. The task results contains the edited
         /// <see cref="Message" /> on success.
         /// </returns>
-        public Task<Message> EditMessageTextAsync(long chatId, int messageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageTextAsync(long chatId, long messageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.EditMessageTextAsync(chatId.ToString(), messageId, text, parseMode, disableWebPagePreview, replyMarkup, cancellationToken);
@@ -252,7 +252,7 @@
         /// A task that represents the asynchronous operation. The task results contains the edited
         /// <see cref="Message" /> on success.
         /// </returns>
-        public Task<Message> EditMessageTextAsync([NotNull] string chatId, int messageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> EditMessageTextAsync([NotNull] string chatId, long messageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsurePositiveNumber(messageId, nameof(messageId));
