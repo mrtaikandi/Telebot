@@ -35,7 +35,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentAsync(long chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync(long chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendDocumentAsync(chatId.ToString(), documentId, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -61,7 +61,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(documentId, nameof(documentId));
@@ -92,7 +92,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentAsync(long chatId, [NotNull] Stream documentStream, string fileName, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync(long chatId, [NotNull] Stream documentStream, string fileName, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendDocumentAsync(chatId.ToString(), documentStream, fileName, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -118,7 +118,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] Stream documentStream, string fileName, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentAsync([NotNull] string chatId, [NotNull] Stream documentStream, string fileName, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(documentStream, nameof(documentStream));
@@ -151,7 +151,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendDocumentFromFileAsync(chatId.ToString(), filePath, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -177,7 +177,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendDocumentFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendDocumentFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));

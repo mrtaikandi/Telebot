@@ -35,7 +35,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Types.Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVideoAsync(long chatId, [NotNull] string videoId, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync(long chatId, [NotNull] string videoId, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVideoAsync(chatId.ToString(), videoId, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -62,7 +62,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] string videoId, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] string videoId, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(videoId, nameof(videoId));
@@ -98,7 +98,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVideoAsync(long chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync(long chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVideoAsync(chatId.ToString(), videoStream, fileName, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -126,7 +126,7 @@
         /// Telegram clients support mp4 videos (other formats may be sent as <see cref="Document" />). Bots
         /// can currently send video files of up to 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoAsync([NotNull] string chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(videoStream, nameof(videoStream));
@@ -161,7 +161,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendVideoFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVideoFromFileAsync(chatId.ToString(), filePath, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -188,7 +188,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendVideoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVideoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));

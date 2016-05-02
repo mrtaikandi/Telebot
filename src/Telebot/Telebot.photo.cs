@@ -30,7 +30,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoAsync(long chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync(long chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendPhotoAsync(chatId.ToString(), documentId, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -52,7 +52,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(documentId, nameof(documentId));
@@ -81,7 +81,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoAsync(long chatId, [NotNull] Stream photoStream, string fileName, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync(long chatId, [NotNull] Stream photoStream, string fileName, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendPhotoAsync(chatId.ToString(), photoStream, fileName, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -104,7 +104,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] Stream photoStream, string fileName, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoAsync([NotNull] string chatId, [NotNull] Stream photoStream, string fileName, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(photoStream, nameof(photoStream));
@@ -134,7 +134,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendPhotoFromFileAsync(chatId.ToString(), filePath, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -156,7 +156,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendPhotoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendPhotoFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));
