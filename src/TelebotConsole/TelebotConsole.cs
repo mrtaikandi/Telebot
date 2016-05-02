@@ -41,14 +41,14 @@ namespace TelebotConsole
             // the identifiers of previously received updates. By default, updates starting with the earliest
             // unconfirmed update are returned. An update is considered confirmed as soon as getUpdates is
             // called with an offset higher than its update_id.
-            this._offset = 684029274;
+            this._offset = 21226760;
         }
 
         #endregion
 
         #region Public Methods and Operators
 
-        public async Task Run()
+        public async Task RunAsync()
         {
             Console.WriteLine("Running Telebot with key: {0}", this._telegramApiKey);
             this._telebot = new Telebot(this._telegramApiKey);
@@ -67,10 +67,10 @@ namespace TelebotConsole
                             switch( update.Type )
                             {
                                 case UpdateType.Message:
-                                    await this.CheckMessages(update);
+                                    await this.CheckMessagesAsync(update);
                                     break;
                                 case UpdateType.InlineQuery:
-                                    await this.CheckInlineQuery(update);
+                                    await this.CheckInlineQueryAsync(update);
                                     break;
                                 case UpdateType.ChosenInlineResult:
                                     this.CheckChosenInlineResult(update);
@@ -92,7 +92,7 @@ namespace TelebotConsole
 
                     WriteLine(ConsoleColor.DarkGray, "----------------------------------------------");
                 }
-            }            
+            }
         }
 
         private void CheckChosenInlineResult(Update update)
@@ -101,36 +101,41 @@ namespace TelebotConsole
             Dump(update, ConsoleColor.Blue);
         }
 
-        private async Task CheckInlineQuery(Update update)
+        private Task CheckInlineQueryAsync(Update update)
         {
             WriteLine(ConsoleColor.Green, "Received InlineQuery:");
             Dump(update, ConsoleColor.Green);
 
-            var results = new InlineQueryResult[]
-                                         {
-                                             new InlineQueryResultArticle(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "This is a title",
-                                                     "This is a message."
-                                                     ) {ParseMode = ParseMode.Markdown},
-                                             new InlineQueryResultPhoto(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
-                                                     "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
-                                                     ),
-                                             new InlineQueryResultGif(
-                                                     Guid.NewGuid().ToString("N"),
-                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
-                                                     "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
-                                                     )
-                                         };
+    var articleResult = new InlineQueryResultArticle
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Title = "This is a title",
+        Url = "https://core.telegram.org/bots/api#inlinequeryresultarticle"
+    };
+    
+    var photoResult = new InlineQueryResultPhoto
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
+        ThumbnailUrl = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
+    };
+    
+    
+    var gifResult = new InlineQueryResultGif
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
+        ThumbnailUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
+    };
+    
+    var results = new InlineQueryResult[] { articleResult, photoResult, gifResult };
 
             var answerId = update.InlineQuery.Id;
             WriteLine(ConsoleColor.DarkGreen, "Sending: ");
             WriteLine(ConsoleColor.DarkGreen, $"Answer Id: {answerId}");
             Dump(results, ConsoleColor.DarkGreen);
 
-            await this._telebot.AnswerInlineQueryAsync(answerId, results);
+            return this._telebot.AnswerInlineQueryAsync(answerId, results);
         }
 
         #endregion
@@ -156,7 +161,7 @@ namespace TelebotConsole
             WriteLine(ConsoleColor.Red, ex.ToString());
         }
 
-        private Task CheckMessages(Update update)
+        private Task CheckMessagesAsync(Update update)
         {
             Dump(update);
 
@@ -167,7 +172,7 @@ namespace TelebotConsole
             switch( message )
             {
                 case "/sendphoto":
-                    return this.SendPhoto(update);
+                    return this.SendPhotoAsync(update);
                 case "/chataction":
                     return this.SendChatActionAsync(update);
                 default:
@@ -197,7 +202,7 @@ namespace TelebotConsole
             return this._telebot.SendChatActionAsync(update.Message.Chat.Id.ToString(), ChatAction.Typing);
         }
 
-        private Task SendPhoto(Update update)
+        private Task SendPhotoAsync(Update update)
         {
             var actionTask = this._telebot.SendChatActionAsync(update.Message.Chat.Id.ToString(), ChatAction.UploadPhoto);
             var sendTask = this._telebot.SendPhotoFromFileAsync(update.Message.Chat.Id.ToString(), @"D:\Temp\brekeke-frog-symbol.jpg", "The Frog!");
