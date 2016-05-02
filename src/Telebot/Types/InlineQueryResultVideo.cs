@@ -5,48 +5,28 @@
     using Newtonsoft.Json;
 
     /// <summary>
-    /// Represents link to a page containing an embedded video player or a video file.
+    /// Represents a link to a page containing an embedded video player or a video file. By default, this
+    /// video file will be sent by the user with an optional caption. Alternatively, you can use
+    /// <see cref="InlineQueryResult.MessageContent" /> to send a message with the specified content
+    /// instead of the video.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
     public class InlineQueryResultVideo : InlineQueryResult
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InlineQueryResultVideo" /> class.
-        /// </summary>
-        public InlineQueryResultVideo()
-            : this(null, null, null, null, null) { }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="InlineQueryResultVideo" /> class.
-        /// </summary>
-        /// <param name="id">The unique identifier of this result. Must be less than 64 bytes.</param>
-        /// <param name="url">A valid URL of the photo. Photo size must not exceed 5MB.</param>
-        /// <param name="thumbnailUrl">The URL of the thumbnail for the result either in <c>.jpeg</c> or <c>.gif</c> format.</param>
-        /// <param name="mimeType">Type of the MIME.</param>
-        /// <param name="messageText">The text of a message to be sent.</param>
-        public InlineQueryResultVideo(string id, string url, string thumbnailUrl, MimeTypes mimeType, string messageText)
-        {
-            ExceptionHelper.ValidateArgumentByteCount(nameof(id), id);
-
-            this.Id = id;
-            this.Url = url;
-            this.ThumbnailUrl = thumbnailUrl;
-            this.MimeType = mimeType;
-            this.MessageText = messageText;
-        }
-
         #region Public Properties
+
+        /// <summary>
+        /// Gets or sets the caption of the video to be sent, 0-200 characters (Optional).
+        /// </summary>
+        [StringLength(200)]
+        [JsonProperty("caption")]
+        public string Caption { get; set; }
 
         /// <summary>
         /// Gets or sets a short description of the result (Optional).
         /// </summary>
         [JsonProperty("description")]
         public string Description { get; set; }
-
-        /// <summary>Gets or sets the title of the result.</summary>
-        [Required]
-        [JsonProperty("title", Required = Required.Always)]
-        public string Title { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating the video duration in seconds (Optional).
@@ -59,18 +39,12 @@
         public int Height { get; set; }
 
         /// <summary>
-        /// Gets or sets the mime type of the content of video url, "text/html" or "video/mp4". 
-        /// Use values from <see cref="MimeTypes"/> class.
+        /// Gets or sets the mime type of the content of video url, "text/html" or "video/mp4". Use values from
+        /// <see cref="MimeTypes" /> class.
         /// </summary>
         [Required]
         [JsonProperty("mime_type", Required = Required.Always)]
         public string MimeType { get; set; }
-
-        /// <summary>Gets or sets the text of a message to be sent with the video.</summary>
-        [Required]
-        [StringLength(512)]
-        [JsonProperty("message_text", Required = Required.Always)]
-        public string MessageText { get; set; }
 
         /// <summary>
         /// Gets or sets the URL of the thumbnail for the result either in <c>.jpeg</c> or <c>.gif</c> format.
@@ -78,6 +52,11 @@
         [Required]
         [JsonProperty("thumb_url", Required = Required.Always)]
         public string ThumbnailUrl { get; set; }
+
+        /// <summary>Gets or sets the title of the result.</summary>
+        [Required]
+        [JsonProperty("title", Required = Required.Always)]
+        public string Title { get; set; }
 
         /// <summary>Gets or sets the type of the result.</summary>
         public override InlineQueryResultType Type => InlineQueryResultType.Video;

@@ -49,7 +49,7 @@
         /// keyboard with poll options to users who haven't voted yet.
         /// </para>
         /// </summary>
-        [JsonProperty("selective")]
+        [JsonProperty("selective", DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate)]
         public bool Selective { get; set; }
 
         #endregion

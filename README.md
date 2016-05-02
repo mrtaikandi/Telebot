@@ -10,40 +10,41 @@ First, [install NuGet](http://docs.nuget.org/docs/start-here/installing-nuget). 
 
 How can I use it?
 --------------------------------
-> For Persian how-to guide, please [visit my blog](https://taikandi.com/blog/creating-telegram-bot-using-telebot/).
+> For Persian (Farsi) how-to guide, please [visit my blog](https://taikandi.com/blog/creating-telegram-bot-using-telebot/).
 
-Simply instanciate `Telebot` class and use available methods.
+Simply instantiate `Telebot` class and use available methods.
 `Telebot` internally uses [HttpClient](https://msdn.microsoft.com/en-us/library/system.net.http.httpclient%28v=vs.118%29.aspx) so, it is recommended not to dispose it after every request. 
 I suggest to read the `Lifecycle` section of the [Designing Evolvable Web APIs with ASP.NET](http://chimera.labs.oreilly.com/books/1234000001708/ch14.html#_httpclient_class).
 
 ```csharp
 // Provides a base class for communicating with Telegram Bot API servers.
-private static readonly Telebot = new Telebot("123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11");
-    
-public static void Main(string[] args)
+private readonly Telebot _telebot = new Telebot("123456:ABC-DEF1234ghIkl-zyx57W2v1u123ew11");
+
+public async Task RunAsync()
 {
     // Used for getting only the unconfirmed updates.
+    // It is recommended to stored this value between sessions. 
     // More information at https://core.telegram.org/bots/api#getting-updates
-    var offset = 0; 
+    var offset = 0L;
 
     while( true )
     {
         // Use this method to receive incoming updates using long polling.
-        // Or use Telebot.SetWebhook() method to specifiy a url to receive incoming updates.
-        List<Update> updates = (await Telebot.GetUpdatesAsync(offset)).ToList();
+        // Or use Telebot.SetWebhook() method to specify a URL to receive incoming updates.
+        List<Update> updates = (await this._telebot.GetUpdatesAsync(offset).ConfigureAwait(false)).ToList();
         if( updates.Any() )
         {
-            offset = updates.Max(u => u.Id) + 1;        
+            offset = updates.Max(u => u.Id) + 1;
 
             foreach( Update update in updates )
             {
                 switch( update.Type )
                 {
                     case UpdateType.Message:
-                        await this.CheckMessages(update);
+                        await this.CheckMessagesAsync(update.Message).ConfigureAwait(false);
                         break;
                     case UpdateType.InlineQuery:
-                        await this.CheckInlineQuery(update);
+                        await this.CheckInlineQueryAsync(update).ConfigureAwait(false);
                         break;
                     case UpdateType.ChosenInlineResult:
                         this.CheckChosenInlineResult(update);
@@ -54,51 +55,59 @@ public static void Main(string[] args)
             }
         }
 
-        await Task.Delay(TimeSpan.FromSeconds(1));
+        await Task.Delay(TimeSpan.FromSeconds(1)).ConfigureAwait(false);
     }
 }
 
-private static async Task CheckMessages(Message message)
+private async Task CheckMessagesAsync(Message message)
 {
     // Assume we are doing more than echoing stuff.
     if( message == null )
-        return Task.FromResult(0);
+        return;
 
     // This method will tell the user that something is happening on the bot's side.
     // It is recommended to use this method when a response from the bot 
     // will take a noticeable amount of time to arrive.
-    await Telebot.SendChatAction(message.Chat.Id, ChatAction.Typing);
-    await Task.Delay(TimeSpan.FromSeconds(3));
-    
-    // This method will sends a text message (obviously).
-    return await Telebot.SendMessageAsync(message.Chat.Id, message.Text ?? "Hmmmm");        
+    await this._telebot.SendChatActionAsync(message.Chat.Id, ChatAction.Typing).ConfigureAwait(false);
+    await Task.Delay(TimeSpan.FromSeconds(3)).ConfigureAwait(false);
+
+    // This method will send a text message (obviously).
+    await this._telebot.SendMessageAsync(message.Chat.Id, message.Text ?? "Hmmmm").ConfigureAwait(false);
 }
 
-private async Task CheckInlineQuery(Update update)
+private async Task CheckInlineQueryAsync(Update update)
 {
+    // Telebot will support all 19 types of InlineQueryResult.
     // To see available inline query results:
     // https://core.telegram.org/bots/api#answerinlinequery
-    var results = new InlineQueryResult[]
-                                 {
-                                     new InlineQueryResultArticle(
-                                             Guid.NewGuid().ToString("N"),
-                                             "This is a title",
-                                             "This is a message.") { ParseMode = ParseMode.Markdown },
-                                     new InlineQueryResultPhoto(
-                                             Guid.NewGuid().ToString("N"),
-                                             "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
-                                             "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"),
-                                     new InlineQueryResultGif(
-                                             Guid.NewGuid().ToString("N"),
-                                             "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
-                                             "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif")
-                                 };
-   
-    await this._telebot.AnswerInlineQueryAsync(update.InlineQuery.Id, results);
+    var articleResult = new InlineQueryResultArticle
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Title = "This is a title",
+        Url = "https://core.telegram.org/bots/api#inlinequeryresultarticle"
+    };
+    
+    var photoResult = new InlineQueryResultPhoto
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
+        ThumbnailUrl = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
+    };
+    
+    
+    var gifResult = new InlineQueryResultGif
+    {
+        Id = Guid.NewGuid().ToString("N"),
+        Url = "http://i.giphy.com/ya4eevXU490Iw.gif",
+        ThumbnailUrl = "http://i.giphy.com/ya4eevXU490Iw.gif"
+    };
+    
+    var results = new InlineQueryResult[] { articleResult, photoResult, gifResult };
+    await this._telebot.AnswerInlineQueryAsync(update.InlineQuery.Id, results).ConfigureAwait(false);
 }
 
 private void CheckChosenInlineResult(Update update)
 {
-    Console.WriteLine("Received ChosenInlineResult.");    
+    Console.WriteLine("Received ChosenInlineResult.");
 }
 ```
