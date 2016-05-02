@@ -58,7 +58,49 @@
         public void AddIf(bool condition, string key, string value)
         {
             if( condition )
-                this.Add( new KeyValuePair< string, string >( key, value ) );
+                this.Add(new KeyValuePair<string, string>(key, value));
+        }
+
+        /// <summary>
+        /// Adds a key value pair to the underlying collection.
+        /// </summary>
+        /// <param name="condition">
+        /// the condition expression to evaluate. If the condition is <c>true</c> provided
+        /// <paramref name="key" /> and <paramref name="value" /> gets added to the collection.
+        /// </param>
+        /// <param name="key">The object defined in each key/value pair.</param>
+        /// <param name="value">The definition associated with key.</param>
+        public void AddIf(bool condition, string key, int value)
+        {
+            this.AddIf(condition, key, value.ToString());
+        }
+
+        /// <summary>
+        /// Adds a key value pair to the underlying collection.
+        /// </summary>
+        /// <param name="condition">
+        /// the condition expression to evaluate. If the condition is <c>true</c> provided
+        /// <paramref name="key" /> and <paramref name="value" /> gets added to the collection.
+        /// </param>
+        /// <param name="key">The object defined in each key/value pair.</param>
+        /// <param name="value">The definition associated with key.</param>
+        public void AddIf(bool condition, string key, long value)
+        {
+            this.AddIf(condition, key, value.ToString());
+        }
+
+        /// <summary>
+        /// Adds a key value pair to the underlying collection.
+        /// </summary>
+        /// <param name="condition">
+        /// the condition expression to evaluate. If the condition is <c>true</c> provided
+        /// <paramref name="key" /> and <paramref name="value" /> gets added to the collection.
+        /// </param>
+        /// <param name="key">The object defined in each key/value pair.</param>
+        /// <param name="value">The definition associated with key.</param>
+        public void AddIf(bool condition, string key, bool value)
+        {
+            this.AddIf(condition, key, value.ToString());
         }
 
         #endregion

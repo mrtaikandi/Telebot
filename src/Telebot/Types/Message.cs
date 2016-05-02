@@ -61,6 +61,13 @@
         public Document Document { get; set; }
 
         /// <summary>
+        /// Gets or sets the special entities like usernames, URLs, bot commands, etc. for text messages that
+        /// appear in the text.
+        /// </summary>
+        [JsonProperty("entities")]
+        public MessageEntity[] Entities { get; set; }
+
+        /// <summary>
         /// Gets or sets the date the original message was sent for forwarded messages (Optional).
         /// </summary>
         [JsonProperty("forward_date")]
@@ -92,8 +99,8 @@
         /// Gets or sets the information about the member (which might be a bo itself) removed from the group
         /// (Optional).
         /// </summary>
-        [JsonProperty("left_chat_participant")]
-        public User LeftChatParticipant { get; set; }
+        [JsonProperty("left_chat_member")]
+        public User LeftChatMember { get; set; }
 
         /// <summary>
         /// Gets or sets the information about the location if the message is a shared location (Optional).
@@ -117,8 +124,8 @@
         /// Gets or sets the information about the new member (which might be a bo itself) added to the group
         /// (Optional).
         /// </summary>
-        [JsonProperty("new_chat_participant")]
-        public User NewChatParticipant { get; set; }
+        [JsonProperty("new_chat_member")]
+        public User NewChatMember { get; set; }
 
         /// <summary>Gets or sets the group new photo (Optional).</summary>
         [JsonProperty("new_chat_photo")]
@@ -135,6 +142,14 @@
         /// </summary>
         [JsonProperty("photo")]
         public IList<PhotoSize> Photos { get; set; }
+
+        /// <summary>
+        /// Gets or sets the pinned message. Note that the <see cref="Message" /> object in this field will not
+        /// contain further
+        /// <see cref="ReplyToMessage" /> fields even if it is itself a reply.
+        /// </summary>
+        [JsonProperty("pinned_message")]
+        public Message PinnedMessage { get; set; }
 
         /// <summary>
         /// Gets or sets the original message for replies.
@@ -165,9 +180,7 @@
         [JsonProperty("text")]
         public string Text { get; set; }
 
-        /// <summary>
-        /// Gets the type of message.
-        /// </summary>
+        /// <summary>Gets the type of message.</summary>
         public MessageType Type
         {
             get
@@ -202,6 +215,12 @@
                 return MessageType.Unknown;
             }
         }
+
+        /// <summary>
+        /// Gets or sets the information about the venue if this message is a venue (Optional).
+        /// </summary>
+        [JsonProperty("venue")]
+        public Venue Venue { get; set; }
 
         /// <summary>
         /// Gets or sets the information about the video if message is a video (Optional).
