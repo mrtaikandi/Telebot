@@ -41,7 +41,7 @@
         /// <exception cref="System.ArgumentNullException">
         /// chatId cannot be null -or- phoneNumber cannot be null -or- firstName cannot be null.
         /// </exception>
-        public Task<Message> SendContactAsync(long chatId, [NotNull] string phoneNumber, [NotNull] string firstName, string lastName = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendContactAsync(long chatId, [NotNull] string phoneNumber, [NotNull] string firstName, string lastName = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
 
@@ -78,7 +78,7 @@
         /// <exception cref="System.ArgumentNullException">
         /// chatId cannot be null -or- phoneNumber cannot be null -or- firstName cannot be null.
         /// </exception>
-        public Task<Message> SendContactAsync([NotNull] string chatId, [NotNull] string phoneNumber, [NotNull] string firstName, string lastName = null, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendContactAsync([NotNull] string chatId, [NotNull] string phoneNumber, [NotNull] string firstName, string lastName = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(phoneNumber, nameof(phoneNumber));

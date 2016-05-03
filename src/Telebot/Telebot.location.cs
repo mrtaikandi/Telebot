@@ -27,7 +27,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendLocationAsync(long chatId, double latitude, double longitude, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendLocationAsync(long chatId, double latitude, double longitude, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.SendLocationAsync(chatId.ToString(), latitude, longitude, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
@@ -48,7 +48,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendLocationAsync([NotNull] string chatId, double latitude, double longitude, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendLocationAsync([NotNull] string chatId, double latitude, double longitude, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
 

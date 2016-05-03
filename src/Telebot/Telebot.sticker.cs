@@ -29,7 +29,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendStickerAsync(long chatId, [NotNull] string stickerId, int replyToMessageId = 0, bool disableNotification = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync(long chatId, [NotNull] string stickerId, long replyToMessageId = 0, bool disableNotification = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendStickerAsync(chatId.ToString(), stickerId, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -50,7 +50,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] string stickerId, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] string stickerId, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(stickerId, nameof(stickerId));
@@ -74,7 +74,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendStickerAsync(long chatId, [NotNull] Stream stickerStream, string fileName, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync(long chatId, [NotNull] Stream stickerStream, string fileName, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendStickerAsync(chatId.ToString(), stickerStream, fileName, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -96,7 +96,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] Stream stickerStream, string fileName, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerAsync([NotNull] string chatId, [NotNull] Stream stickerStream, string fileName, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(stickerStream, nameof(stickerStream));
@@ -126,7 +126,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendStickerFromFileAsync(long chatId, [NotNull] string filePath, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerFromFileAsync(long chatId, [NotNull] string filePath, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendStickerFromFileAsync(chatId.ToString(), filePath, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -151,7 +151,7 @@
         /// Bots can currently send files of any type of up to 50 MB in size, this limit may be changed in the
         /// future.
         /// </remarks>
-        public Task<Message> SendStickerFromFileAsync([NotNull] string chatId, [NotNull] string filePath, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendStickerFromFileAsync([NotNull] string chatId, [NotNull] string filePath, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));

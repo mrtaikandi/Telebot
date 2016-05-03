@@ -35,7 +35,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVoiceAsync(chatId.ToString(), voice, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -62,7 +62,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(voice, nameof(voice));
@@ -96,7 +96,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVoiceAsync(chatId.ToString(), voiceStream, fileName, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -124,7 +124,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(voiceStream, nameof(voiceStream));
@@ -159,7 +159,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
             return this.SendVoiceFromFileAsync(chatId.ToString(), filePath, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
@@ -186,7 +186,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, int replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));
