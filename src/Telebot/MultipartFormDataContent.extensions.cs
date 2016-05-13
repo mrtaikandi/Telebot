@@ -72,11 +72,9 @@
             if( valueType == typeof(string) )
                 return new StringContent(value as string);
 
-            if( valueType == typeof(Stream) )
-                return new StreamContent(value as Stream);
-
-            if( valueType == typeof(FileStream) )
-                return new StreamContent(value as FileStream);
+            var stream = value as Stream;
+            if( stream != null )
+                return new StreamContent( stream );
 
             return new StringContent(JsonConvert.SerializeObject(value, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore }));
         }
