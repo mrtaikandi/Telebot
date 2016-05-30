@@ -471,22 +471,21 @@
         /// </remarks>
         public async Task SetWebhookAsync(string url, string certificatePath = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if( string.IsNullOrWhiteSpace(certificatePath) )
-                await this.Client.PostAsync(url, null, cancellationToken).ConfigureAwait(false);
-            else
-            {
-                Contracts.EnsureFileExists(certificatePath);
-                
-                using( var content = new MultipartFormDataContent() )
-                {
-                    var fileName = Path.GetFileName(certificatePath);
-                    var fileStream = System.IO.File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-                    content.Add("certificate", fileStream, fileName);
-                    content.Add("url", url);
+            if( !string.IsNullOrWhiteSpace( certificatePath ) )
+                Contracts.EnsureFileExists( certificatePath );
 
-                    var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
-                    EnsureSuccessStatusCode(response);
+            using (var content = new MultipartFormDataContent())
+            {
+                if( !string.IsNullOrWhiteSpace( certificatePath ) )
+                {
+                    var fileName = Path.GetFileName( certificatePath );
+                    var fileStream = System.IO.File.Open( certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read );
+                    content.Add( "certificate", fileStream, fileName );
                 }
+                content.Add("url", url);
+
+                var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
+                EnsureSuccessStatusCode(response);
             }
         }
 
