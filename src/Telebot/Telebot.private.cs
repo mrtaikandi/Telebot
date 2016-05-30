@@ -25,7 +25,7 @@
         protected virtual HttpClient CreateHttpClient()
         {
             var client = new HttpClient { BaseAddress = new Uri($"https://api.telegram.org/bot{this.ApiKey}/", UriKind.Absolute) };
-
+            
             return client;
         }
 

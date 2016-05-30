@@ -36,6 +36,7 @@
             Contracts.EnsureNotNull(apiKey, nameof(apiKey));
 
             this.ApiKey = apiKey;
+            this.Timeout = TimeSpan.FromMinutes(1);
         }
 
         #endregion
@@ -43,21 +44,38 @@
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets a value indicating whether disable all notifications. If set to <c>true</c> Sends the message 
-        /// silently. iOS users will not receive a notification, Android users will receive a notification with no sound.
+        /// Gets or sets a value indicating whether disable all notifications. If set to <c>true</c> Sends the
+        /// message silently. iOS users will not receive a notification, Android users will receive a
+        /// notification with no sound.
         /// <para>
-        /// Note that this property - if <c>true</c> - will overwrite <c>disableNotification</c> parameter of send messages.
+        /// Note that this property - if <c>true</c> - will overwrite <c>disableNotification</c> parameter of
+        /// send messages.
         /// </para>
         /// </summary>
         public bool DisableNotifications { get; set; }
 
-        public HttpClient Client => this._client ?? (this._client = this.CreateHttpClient());
+        /// <summary>
+        /// Gets or sets the timespan to wait before the request to Telegram APIs times out.
+        /// </summary>
+        public TimeSpan Timeout { get; set; }
 
         #endregion
 
         #region Properties
 
         protected string ApiKey { get; }
+
+        protected HttpClient Client
+        {
+            get
+            {
+                if( this._client == null )
+                    this._client = this.CreateHttpClient();
+
+                this._client.Timeout = this.Timeout;
+                return this._client;
+            }
+        }
 
         #endregion
 
@@ -90,7 +108,7 @@
 
             var parameters = new NameValueCollection
                                  {
-                                     { "callback_query_id", callbackQueryId },
+                                     { "callback_query_id", callbackQueryId }, 
                                      { "show_alert", showAlert.ToString() }
                                  };
 
@@ -471,17 +489,18 @@
         /// </remarks>
         public async Task SetWebhookAsync(string url, string certificatePath = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if( !string.IsNullOrWhiteSpace( certificatePath ) )
-                Contracts.EnsureFileExists( certificatePath );
+            if( !string.IsNullOrWhiteSpace(certificatePath) )
+                Contracts.EnsureFileExists(certificatePath);
 
-            using (var content = new MultipartFormDataContent())
+            using( var content = new MultipartFormDataContent() )
             {
-                if( !string.IsNullOrWhiteSpace( certificatePath ) )
+                if( !string.IsNullOrWhiteSpace(certificatePath) )
                 {
-                    var fileName = Path.GetFileName( certificatePath );
-                    var fileStream = System.IO.File.Open( certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read );
-                    content.Add( "certificate", fileStream, fileName );
+                    var fileName = Path.GetFileName(certificatePath);
+                    var fileStream = System.IO.File.Open(certificatePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                    content.Add("certificate", fileStream, fileName);
                 }
+
                 content.Add("url", url);
 
                 var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
