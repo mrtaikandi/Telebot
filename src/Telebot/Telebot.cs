@@ -65,17 +65,7 @@
 
         protected string ApiKey { get; }
 
-        protected HttpClient Client
-        {
-            get
-            {
-                if( this._client == null )
-                    this._client = this.CreateHttpClient();
-
-                this._client.Timeout = this.Timeout;
-                return this._client;
-            }
-        }
+        protected HttpClient Client => this._client ?? (this._client = this.CreateHttpClient());
 
         #endregion
 
