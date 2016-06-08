@@ -82,7 +82,7 @@
             parameters.AddIf(messageId > 0, "message_id", messageId.ToString());
             parameters.AddIf(!string.IsNullOrWhiteSpace(inlineMessageId), "inline_message_id", inlineMessageId);
             parameters.Add("text", text);
-            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", ParseMode.Markdown.ToString());
+            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());
             parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
             
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageText", parameters, replyMarkup: replyMarkup);

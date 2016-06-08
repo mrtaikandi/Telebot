@@ -200,7 +200,7 @@
 
             var parameters = new NameValueCollection { { "text", text } };
             parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
-            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", ParseMode.Markdown.ToString());            
+            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());            
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendMessage", parameters, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
