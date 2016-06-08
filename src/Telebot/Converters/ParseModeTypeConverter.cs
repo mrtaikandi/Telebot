@@ -31,7 +31,7 @@
         public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
         {
             var value = (string)reader.Value;
-            return string.IsNullOrWhiteSpace(value) ? ParseMode.Normal : ParseMode.Markdown;
+            return string.IsNullOrWhiteSpace(value) ? ParseMode.Normal : Enum.Parse(typeof(ParseMode), value, true);
         }
 
         /// <summary>Writes the JSON representation of the object.</summary>
@@ -43,12 +43,12 @@
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
             var parseMode = (ParseMode)value;
-            if( parseMode != ParseMode.Normal )
+            if( parseMode == ParseMode.Markdown )
                 writer.WriteValue("markdown");
+            else if( parseMode == ParseMode.Html )
+                writer.WriteValue("html");
             else
-            {
                 writer.WriteValue(string.Empty);
-            }
         }
 
         #endregion
