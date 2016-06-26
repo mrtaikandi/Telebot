@@ -37,7 +37,7 @@
         /// </remarks>
         public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVoiceAsync(chatId.ToString(), voice, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -98,7 +98,7 @@
         /// </remarks>
         public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVoiceAsync(chatId.ToString(), voiceStream, fileName, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -161,7 +161,7 @@
         /// </remarks>
         public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVoiceFromFileAsync(chatId.ToString(), filePath, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

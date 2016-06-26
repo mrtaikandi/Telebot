@@ -43,7 +43,7 @@
         /// </exception>
         public Task<Message> SendContactAsync(long chatId, [NotNull] string phoneNumber, [NotNull] string firstName, string lastName = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
 
             return this.SendContactAsync(chatId.ToString(), phoneNumber, firstName, lastName, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
