@@ -65,7 +65,7 @@
         /// </returns>
         public Task<Message> SendAudioAsync(long chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendAudioAsync(chatId.ToString(), audioId, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -89,7 +89,7 @@
         /// </returns>
         public Task<Message> SendAudioAsync(long chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendAudioAsync(chatId.ToString(), audioStream, fileName, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

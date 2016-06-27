@@ -37,7 +37,7 @@
         /// </remarks>
         public Task<Message> SendDocumentAsync(long chatId, [NotNull] string documentId, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendDocumentAsync(chatId.ToString(), documentId, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -153,7 +153,7 @@
         /// </remarks>
         public Task<Message> SendDocumentFromFileAsync(long chatId, [NotNull] string filePath, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendDocumentFromFileAsync(chatId.ToString(), filePath, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

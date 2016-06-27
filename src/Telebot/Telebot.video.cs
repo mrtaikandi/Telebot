@@ -37,7 +37,7 @@
         /// </remarks>
         public Task<Message> SendVideoAsync(long chatId, [NotNull] string videoId, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVideoAsync(chatId.ToString(), videoId, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -100,7 +100,7 @@
         /// </remarks>
         public Task<Message> SendVideoAsync(long chatId, [NotNull] Stream videoStream, string fileName, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVideoAsync(chatId.ToString(), videoStream, fileName, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -163,7 +163,7 @@
         /// </remarks>
         public Task<Message> SendVideoFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string caption = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendVideoFromFileAsync(chatId.ToString(), filePath, duration, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

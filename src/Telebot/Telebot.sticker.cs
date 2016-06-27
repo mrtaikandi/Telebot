@@ -31,7 +31,7 @@
         /// </returns>
         public Task<Message> SendStickerAsync(long chatId, [NotNull] string stickerId, long replyToMessageId = 0, bool disableNotification = false, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendStickerAsync(chatId.ToString(), stickerId, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -76,7 +76,7 @@
         /// </returns>
         public Task<Message> SendStickerAsync(long chatId, [NotNull] Stream stickerStream, string fileName, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendStickerAsync(chatId.ToString(), stickerStream, fileName, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -128,7 +128,7 @@
         /// </remarks>
         public Task<Message> SendStickerFromFileAsync(long chatId, [NotNull] string filePath, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendStickerFromFileAsync(chatId.ToString(), filePath, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

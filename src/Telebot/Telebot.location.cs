@@ -29,6 +29,7 @@
         /// </returns>
         public Task<Message> SendLocationAsync(long chatId, double latitude, double longitude, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendLocationAsync(chatId.ToString(), latitude, longitude, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 

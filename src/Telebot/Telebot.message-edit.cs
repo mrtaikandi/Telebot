@@ -34,7 +34,7 @@
         /// </returns>
         public Task<Message> EditMessageCaptionAsync(long chatId, long messageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.EditMessageCaptionAsync(chatId.ToString(), messageId, caption, replyMarkup, cancellationToken);
         }
 
@@ -112,7 +112,7 @@
         /// </returns>
         public Task<Message> EditMessageReplyMarkupAsync(long chatId, long messageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));            
+            Contracts.EnsureNotZero(chatId, nameof(chatId));            
             return this.EditMessageReplyMarkupAsync(chatId.ToString(), messageId, replyMarkup, cancellationToken);
         }
 
@@ -222,7 +222,7 @@
         /// </returns>
         public Task<Message> EditMessageTextAsync(long chatId, long messageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.EditMessageTextAsync(chatId.ToString(), messageId, text, parseMode, disableWebPagePreview, replyMarkup, cancellationToken);
         }
 

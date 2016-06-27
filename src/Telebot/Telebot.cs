@@ -396,7 +396,7 @@
         /// <exception cref="System.ArgumentException">userId must be a number greater than zero.</exception>
         public Task<bool> KickChatMemberAsync(long chatId, long userId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.KickChatMemberAsync(chatId.ToString(), userId, cancellationToken);
         }
 
@@ -522,7 +522,7 @@
         /// <exception cref="System.ArgumentException">userId must be a number greater than zero.</exception>
         public Task<bool> UnbanChatMemberAsync(long chatId, long userId, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.KickChatMemberAsync(chatId.ToString(), userId, cancellationToken);
         }
 

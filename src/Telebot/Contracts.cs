@@ -53,6 +53,15 @@
             if( !File.Exists(filePath) )
                 throw new FileNotFoundException($"Unable to find the requested file at '{filePath}'.", filePath);
         }
+
+        internal static void EnsureNotZero(long value, [NotNull] string paramName)
+        {
+            Debug.Assert(!string.IsNullOrWhiteSpace(paramName), "!string.IsNullOrWhiteSpace(paramName)");
+
+            if (value == 0)
+                throw new ArgumentException($"{paramName} cannot be 0.", paramName);
+        }
+
         #endregion
     }
 }
