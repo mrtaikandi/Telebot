@@ -55,7 +55,7 @@
         /// </returns>
         public Task<Message> ForwardMessageAsync(long chatId, string fromChatId, long messageId, bool disableNotification = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.ForwardMessageAsync(chatId.ToString(), fromChatId, messageId, disableNotification, cancellationToken);
         }
 
@@ -75,7 +75,7 @@
         /// </returns>
         public Task<Message> ForwardMessageAsync(long chatId, long fromChatId, long messageId, bool disableNotification = false, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.ForwardMessageAsync(chatId.ToString(), fromChatId.ToString(), messageId, disableNotification, cancellationToken);
         }
 
@@ -105,7 +105,7 @@
         /// </remarks>
         public Task<bool> SendChatActionAsync(long chatId, ChatAction action, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendChatActionAsync(chatId.ToString(), action, cancellationToken);
         }
 
@@ -162,7 +162,7 @@
         /// </returns>
         public Task<Message> SendMessageAsync(long chatId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
             return this.SendMessageAsync(chatId.ToString(), text, parseMode, disableWebPagePreview, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
@@ -200,7 +200,7 @@
 
             var parameters = new NameValueCollection { { "text", text } };
             parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
-            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", ParseMode.Markdown.ToString());            
+            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());            
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendMessage", parameters, chatId, replyToMessageId, replyMarkup, disableNotification);
         }

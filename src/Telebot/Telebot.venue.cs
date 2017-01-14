@@ -40,7 +40,7 @@
         /// </returns>
         public Task<Message> SendVenueAsync(long chatId, float latitude, float longitude, [NotNull] string title, [NotNull] string address, string forsquareId = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            Contracts.EnsurePositiveNumber(chatId, nameof(chatId));
+            Contracts.EnsureNotZero(chatId, nameof(chatId));
 
             return this.SendVenueAsync(chatId.ToString(), latitude, longitude, title, address, forsquareId, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }

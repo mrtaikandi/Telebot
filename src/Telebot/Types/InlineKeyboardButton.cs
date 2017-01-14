@@ -8,6 +8,18 @@ namespace Taikandi.Telebot.Types
     [JsonObject(MemberSerialization.OptIn)]
     public class InlineKeyboardButton
     {
+        #region Constructors and Destructors
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="InlineKeyboardButton"/> class.
+        /// </summary>
+        public InlineKeyboardButton()
+        {
+            this.Url = string.Empty;
+        }
+
+        #endregion
+
         #region Public Properties
 
         /// <summary>
