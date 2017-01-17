@@ -21,6 +21,13 @@
         #region Public Properties
 
         /// <summary>
+        /// Gets or sets the maximum of 200 character caption of the voice to be sent (Optional).
+        /// </summary>
+        [StringLength(200)]
+        [JsonProperty("caption")]
+        public string Caption { get; set; }
+
+        /// <summary>
         /// Gets or sets the recording duration in seconds (Optional).
         /// </summary>
         [JsonProperty("voice_duration", Required = Required.Always)]

@@ -84,7 +84,7 @@
             parameters.Add("text", text);
             parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());
             parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
-            
+
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageText", parameters, replyMarkup: replyMarkup);
         }
 
@@ -109,7 +109,7 @@
             parameters.AddIf(messageId > 0, "message_id", messageId.ToString());
             parameters.AddIf(!string.IsNullOrWhiteSpace(inlineMessageId), "inline_message_id", inlineMessageId);
             parameters.Add("caption", caption);
-            
+
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageText", parameters, replyMarkup: replyMarkup);
         }
 
@@ -161,7 +161,7 @@
                 throw new HttpRequestException($"Error '{error.ErrorCode}': {error.Description}");
 
             throw new HttpRequestException(response);
-        }     
+        }
 
         private async Task<TResult> CallTelegramMethodAsync<TResult>(CancellationToken cancellationToken, string url, NameValueCollection parameters = null, string chatId = null, long replyToMessageId = 0, IReply replyMarkup = null, bool disableNotification = false)
         {
@@ -177,7 +177,7 @@
             parameters.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
             parameters.AddIf(replyMarkup != null, "reply_markup", JsonConvert.SerializeObject(replyMarkup));
             parameters.AddIf(this.DisableNotifications || disableNotification, "disable_notification ", true);
-            
+
             using( var content = new FormUrlEncodedContent(parameters) )
             {
                 using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )

@@ -35,6 +35,10 @@
         [JsonProperty("width", Required = Required.Always)]
         public int Width { get; set; }
 
+        /// <summary>Gets or sets emoji associated with the sticker (Optional).</summary>
+        [JsonProperty("emoji")]
+        public string Emoji { get; set; }
+
         #endregion
     }
 }

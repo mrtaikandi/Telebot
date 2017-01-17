@@ -10,6 +10,8 @@
 
         public TResult Result { get; set; }
 
+        public ResponseParameters Parameters { get; set; }
+
         #endregion
     }
 }

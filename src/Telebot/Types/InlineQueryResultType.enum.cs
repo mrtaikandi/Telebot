@@ -10,31 +10,31 @@
         /// <summary>
         /// Indicates that the type of <see cref="InlineQueryResult" /> is not specified or is unknown.
         /// </summary>
-        None = 0, 
+        None = 0,
 
         /// <summary>
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultArticle" />.
         /// </summary>
         [EnumMember(Value = "article")]
-        Article, 
+        Article,
 
         /// <summary>
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultPhoto" />.
         /// </summary>
         [EnumMember(Value = "photo")]
-        Photo, 
+        Photo,
 
         /// <summary>
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultGif" />.
         /// </summary>
         [EnumMember(Value = "gif")]
-        Gif, 
+        Gif,
 
         /// <summary>
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultMpeg4Gif" />.
         /// </summary>
         [EnumMember(Value = "mpeg4_gif")]
-        Mpeg4Gif, 
+        Mpeg4Gif,
 
         /// <summary>
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultVideo" />.
@@ -82,6 +82,12 @@
         /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultCachedSticker" />.
         /// </summary>
         [EnumMember(Value = "sticker")]
-        Sticker
+        Sticker,
+
+        /// <summary>
+        /// Indicates that the <see cref="InlineQueryResult" /> is an <see cref="InlineQueryResultGame" />.
+        /// </summary>
+        [EnumMember(Value = "game")]
+        Game
     }
 }

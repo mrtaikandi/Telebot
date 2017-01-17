@@ -59,8 +59,7 @@
 
             var parameters = new NameValueCollection { { "photo", documentId } };
 
-            if( !string.IsNullOrWhiteSpace(caption) )
-                parameters.Add("caption", caption);
+            parameters.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendPhoto", parameters, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -113,8 +112,7 @@
             var content = new MultipartFormDataContent();
             content.Add(new StreamContent(photoStream), "photo", fileName);
 
-            if( !string.IsNullOrWhiteSpace(caption) )
-                content.Add("caption", caption);
+            content.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendPhoto", content, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -161,7 +159,7 @@
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));
             Contracts.EnsureFileExists(filePath);
-            
+
             var fileName = Path.GetFileName(filePath);
             var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
             return this.SendPhotoAsync(chatId, fileStream, fileName, caption, disableNotification, replyToMessageId, replyMarkup, cancellationToken);

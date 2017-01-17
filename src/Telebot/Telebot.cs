@@ -83,6 +83,18 @@
         /// If <c>true</c>, an alert will be shown by the client instead of a notification at the top of the
         /// chat screen. Defaults to <c>false</c>.
         /// </param>
+        /// <param name="url">
+        /// URL that will be opened by the user's client. If you have created a Game and accepted the conditions
+        /// via <c>@Botfather</c>, specify the URL that opens your game – note that this will only work if the query
+        /// comes from a <c>callback_game</c> button.
+        /// <para>
+        /// Otherwise, you may use links like telegram.me/your_bot?start=XXXX that open your bot with a parameter.
+        /// </para>
+        /// </param>
+        /// <param name="cacheTime">
+        /// The maximum amount of time in seconds that the result of the callback query may be cached client-side.
+        /// Telegram apps will support caching starting in version 3.14. Defaults to 0.
+        /// </param>
         /// <param name="cancellationToken">
         /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
         /// complete.
@@ -92,17 +104,20 @@
         /// success; otherwise <c>false</c>.
         /// </returns>
         /// <exception cref="System.ArgumentNullException"></exception>
-        public Task<bool> AnswerCallbackQueryAsync([NotNull] string callbackQueryId, string text = null, bool showAlert = false, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<bool> AnswerCallbackQueryAsync([NotNull] string callbackQueryId, string text = null, bool showAlert = false, string url = null, int cacheTime = 0, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(callbackQueryId, nameof(callbackQueryId));
+            Contracts.EnsurePositiveNumber(cacheTime, nameof(cacheTime));
 
             var parameters = new NameValueCollection
                                  {
-                                     { "callback_query_id", callbackQueryId }, 
+                                     { "callback_query_id", callbackQueryId },
                                      { "show_alert", showAlert.ToString() }
                                  };
 
             parameters.AddIf(!string.IsNullOrWhiteSpace(text), "text", text);
+            parameters.AddIf(!string.IsNullOrWhiteSpace(url), "url", url);
+            parameters.AddIf(cacheTime!=0, "cache_time", cacheTime);
 
             return this.CallTelegramMethodAsync<bool>(cancellationToken, "answerCallbackQuery", parameters);
         }
@@ -445,6 +460,11 @@
         /// The fully qualified path to the certificate path so that the root certificate in use can be
         /// checked.
         /// </param>
+        /// <param name="maxConnections">
+        /// Maximum allowed number of simultaneous HTTPS connections to the webhook for update delivery,
+        /// 1-100. Defaults to 40. Use lower values to limit the load on your bot‘s server, and higher
+        /// values to increase your bot’s throughput.
+        /// </param>
         /// <param name="cancellationToken">
         /// A cancellation token that can be used by other objects or threads to receive notice of
         /// cancellation.
@@ -477,7 +497,7 @@
         ///     </item>
         /// </list>
         /// </remarks>
-        public async Task SetWebhookAsync(string url, string certificatePath = null, CancellationToken cancellationToken = default(CancellationToken))
+        public async Task SetWebhookAsync(string url, string certificatePath = null, int maxConnections = 40, UpdateType[] allowedUpdates = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             if( !string.IsNullOrWhiteSpace(certificatePath) )
                 Contracts.EnsureFileExists(certificatePath);
@@ -491,11 +511,44 @@
                     content.Add("certificate", fileStream, fileName);
                 }
 
+                if( maxConnections != 40 )
+                    content.Add( "max_connections", maxConnections );
                 content.Add("url", url);
 
                 var response = await this.Client.PostAsync("setWebhook", content, cancellationToken).ConfigureAwait(false);
                 EnsureSuccessStatusCode(response);
             }
+        }
+
+        /// <summary>
+        /// Use this method to get current webhook status.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
+        /// <returns>
+        /// On success, returns a WebhookInfo object.
+        /// <para>If the bot is using getUpdates, will return an object with the url field empty.</para>
+        /// </returns>
+        public Task<WebhookInfo> GetWebhookInfoAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.CallTelegramMethodAsync<WebhookInfo>(cancellationToken, "getWebhookInfo");
+        }
+
+        /// <summary>
+        /// Use this method to remove webhook integration if you decide to switch back to <c>getUpdates</c>.
+        /// </summary>
+        /// <param name="cancellationToken">
+        /// A cancellation token that can be used by other objects or threads to receive notice of
+        /// cancellation.
+        /// </param>
+        /// <returns>
+        /// Returns True on success.
+        /// </returns>
+        public Task<bool> DeleteWebhookAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return this.CallTelegramMethodAsync<bool>(cancellationToken, "deleteWebhook");
         }
 
         /// <summary>
@@ -553,6 +606,132 @@
 
             var parameters = new NameValueCollection { { "chat_id", chatId }, { "user_id", userId } };
             return this.CallTelegramMethodAsync<bool>(cancellationToken, "unbanChatMember", parameters);
+        }
+
+        /// <summary>
+        /// Use this method for your bot to leave a group, supergroup or channel
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target supergroup or channel
+        /// (in the format @channelusername).
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>true</c> on
+        /// success.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">chatId cannot be null.</exception>
+        public Task<bool> LeaveChatAsync([NotNull] string chatId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Contracts.EnsureNotNull(chatId, nameof(chatId));
+
+            var parameters = new NameValueCollection { { "chat_id", chatId } };
+            return this.CallTelegramMethodAsync<bool>(cancellationToken, "leaveChat", parameters);
+        }
+
+        /// <summary>
+        /// Use this method to get up to date information about the chat (current name of the user
+        /// for one-on-one conversations, current username of a user, group or channel, etc.).
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target supergroup or channel
+        /// (in the format @channelusername).
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>Chat</c> object on
+        /// success.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">chatId cannot be null.</exception>
+        public Task<Chat> GetChatAsync([NotNull] string chatId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Contracts.EnsureNotNull(chatId, nameof(chatId));
+
+            var parameters = new NameValueCollection { { "chat_id", chatId } };
+            return this.CallTelegramMethodAsync<Chat>(cancellationToken, "getChat", parameters);
+        }
+
+        /// <summary>
+        /// Use this method to get a list of administrators in a chat. On success, returns an Array of ChatMember objects that
+        /// contains information about all chat administrators except other bots. If the chat is a group or a supergroup and no
+        /// administrators were appointed, only the creator will be returned.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target supergroup or channel
+        /// (in the format @channelusername).
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>Chat</c> object on
+        /// success.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">chatId cannot be null.</exception>
+        public Task<ChatMember> GetChatAdministratorsAsync([NotNull] string chatId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Contracts.EnsureNotNull(chatId, nameof(chatId));
+
+            var parameters = new NameValueCollection { { "chat_id", chatId } };
+            return this.CallTelegramMethodAsync<ChatMember>(cancellationToken, "getChatAdministrators", parameters);
+        }
+
+        /// <summary>
+        /// Use this method to get information about a member of a chat.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target supergroup or channel (in the format
+        /// @channelusername)
+        /// </param>
+        /// <param name="userId">Unique identifier of the target user.</param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>ChatMember</c> object on
+        /// success.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">chatId cannot be null.</exception>
+        /// <exception cref="System.ArgumentException">userId must be a number greater than zero.</exception>
+        public Task<ChatMember> GetChatMemberAsync([NotNull] string chatId, long userId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Contracts.EnsureNotNull(chatId, nameof(chatId));
+            Contracts.EnsurePositiveNumber(userId, nameof(userId));
+
+            var parameters = new NameValueCollection { { "chat_id", chatId }, { "user_id", userId } };
+            return this.CallTelegramMethodAsync<ChatMember>(cancellationToken, "getChatMember", parameters);
+        }
+
+        /// <summary>
+        /// Use this method to get the number of members in a chat.
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target supergroup or channel
+        /// (in the format @channelusername).
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains <c>Chat</c> object on
+        /// success.
+        /// </returns>
+        /// <exception cref="System.ArgumentNullException">chatId cannot be null.</exception>
+        public Task<int> GetChatMembersCountAsync([NotNull] string chatId, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            Contracts.EnsureNotNull(chatId, nameof(chatId));
+
+            var parameters = new NameValueCollection { { "chat_id", chatId } };
+            return this.CallTelegramMethodAsync<int>(cancellationToken, "getChatMembersCount", parameters);
         }
 
         #endregion

@@ -40,6 +40,10 @@
         [JsonProperty("url")]
         public string Url { get; set; }
 
+        /// <summary>Gets or sets for “text_mention” only, the mentioned user (Optional).</summary>
+        [JsonProperty("user")]
+        public User User { get; set; }
+
         #endregion
     }
 }
