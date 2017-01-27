@@ -4,10 +4,8 @@
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
-
     using Newtonsoft.Json;
-
-    using Taikandi.Telebot.Converters;
+    using Converters;
 
     /// <summary>This object represents a message.</summary>
     public class Message
@@ -79,6 +77,18 @@
         /// </summary>
         [JsonProperty("forward_from")]
         public User ForwardFrom { get; set; }
+
+        /// <summary>
+        /// For messages forwarded from a channel, information about the original channel (Optional).
+        /// </summary>
+        [JsonProperty("forward_from_chat")]
+        public Chat ForwardFromChat { get; set; }
+
+        /// <summary>
+        /// For forwarded channel posts, identifier of the original message in the channel (Optional).
+        /// </summary>
+        [JsonProperty("forward_from_message_id")]
+        public long ForwardFromMessageId { get; set; }
 
         /// <summary>Gets or sets the sender.</summary>
         [JsonProperty("from", Required = Required.Always)]
@@ -160,6 +170,11 @@
         /// </summary>
         [JsonProperty("reply_to_message")]
         public Message ReplyToMessage { get; set; }
+
+        /// <summary>Gets or sets date the message was last edited.</summary>
+        [JsonProperty("edit_date")]
+        [JsonConverter(typeof(UnixDateTimeConverter))]
+        public DateTimeOffset EditDate { get; set; }
 
         /// <summary>
         /// Gets or sets the information about the sticker if the message is a sticker (Optional).

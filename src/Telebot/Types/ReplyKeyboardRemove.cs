@@ -9,22 +9,22 @@
     /// after the user presses a button. See also <seealso cref="ReplyKeyboardMarkup" />.
     /// </summary>
     [JsonObject(MemberSerialization.OptIn)]
-    public class ReplyKeyboardHide : IReply
+    public class ReplyKeyboardRemove : IReply
     {
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ReplyKeyboardHide" /> class.
+        /// Initializes a new instance of the <see cref="ReplyKeyboardRemove" /> class.
         /// </summary>
-        /// <param name="hideKeyboard">
+        /// <param name="removeKeyboard">
         /// if set to <c>true</c> requests clients to hide the custom keyboard. Defaults to <c>true</c>.
         /// </param>
         /// <param name="selective">
         /// if set to <c>true</c> hides custom keyboard for specific users only. Defaults to <c>true</c>.
         /// </param>
-        public ReplyKeyboardHide(bool hideKeyboard = true, bool selective = true)
+        public ReplyKeyboardRemove(bool removeKeyboard = true, bool selective = true)
         {
-            this.HideKeyboard = hideKeyboard;
+            this.RemoveKeyboard = removeKeyboard;
             this.Selective = selective;
         }
 
@@ -33,10 +33,12 @@
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets a value indicating whether to request clients to hide the custom keyboard.
+        /// Gets or sets requests clients to remove the custom keyboard (user will not be able to summon
+        /// this keyboard; if you want to hide the keyboard from sight but keep it accessible,
+        /// use one_time_keyboard in ReplyKeyboardMarkup)
         /// </summary>
-        [JsonProperty("hide_keyboard", Required = Required.Always)]
-        public bool HideKeyboard { get; set; }
+        [JsonProperty("remove_keyboard", Required = Required.Always)]
+        public bool RemoveKeyboard { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether you want to hide keyboard for specific users only

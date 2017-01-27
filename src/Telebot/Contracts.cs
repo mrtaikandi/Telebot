@@ -10,7 +10,7 @@
     internal static class Contracts
     {
         #region Methods
-        
+
         internal static void EnsureByteCount(string argumentValue, [NotNull] string paramName, int maxCount = 64)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(paramName), "!string.IsNullOrWhiteSpace(paramName)");
@@ -37,13 +37,21 @@
             if( string.IsNullOrWhiteSpace(value) )
                 throw new ArgumentException($"{paramName} cannot be null or empty.", paramName);
         }
-        
+
         internal static void EnsurePositiveNumber(long value, [NotNull] string paramName)
         {
             Debug.Assert(!string.IsNullOrWhiteSpace(paramName), "!string.IsNullOrWhiteSpace(paramName)");
 
             if( value <= 0 )
                 throw new ArgumentException($"{paramName} must be a greater than zero.", paramName);
+        }
+
+        internal static void EnsureNotNegativeNumber(long value, [NotNull] string paramName)
+        {
+            Debug.Assert(!string.IsNullOrWhiteSpace(paramName), "!string.IsNullOrWhiteSpace(paramName)");
+
+            if( value < 0 )
+                throw new ArgumentException($"{paramName} must be a equals or greater than zero.", paramName);
         }
 
         internal static void EnsureFileExists([NotNull] string filePath)

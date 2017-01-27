@@ -4,11 +4,8 @@
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-
     using JetBrains.Annotations;
-
     using Taikandi.Telebot.Types;
-
     using File = System.IO.File;
 
     public partial class Telebot
@@ -21,6 +18,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="audioId">Id of an audio file that is already on the Telegram servers.</param>
+        /// <param name="caption">Audio caption, 0-200 characters</param>
         /// <param name="duration">Duration of the audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
         /// <param name="title">The track name.</param>
@@ -33,7 +31,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] string audioId, string caption = null, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(chatId, nameof(audioId));
@@ -42,6 +40,9 @@
             parameters.AddIf(duration > 0, "duration", duration);
             parameters.AddIf(!string.IsNullOrWhiteSpace(performer), "performer", performer);
             parameters.AddIf(!string.IsNullOrWhiteSpace(title), "title", title);
+            parameters.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption.Length > 200
+                                                                                 ? caption.Substring( 0, 200 )
+                                                                                 : caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendAudio", parameters, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -51,6 +52,7 @@
         /// </summary>
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="audioId">Id of an audio file that is already on the Telegram servers.</param>
+        /// <param name="caption">Audio caption, 0-200 characters</param>
         /// <param name="duration">Duration of the audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
         /// <param name="title">The track name.</param>
@@ -63,10 +65,10 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioAsync(long chatId, [NotNull] string audioId, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync(long chatId, [NotNull] string audioId, string caption = null, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotZero(chatId, nameof(chatId));
-            return this.SendAudioAsync(chatId.ToString(), audioId, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendAudioAsync(chatId.ToString(), audioId, caption, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -74,6 +76,7 @@
         /// </summary>
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="audioStream">A <see cref="Stream" /> to the audio file to send.</param>
+        /// <param name="caption">Audio caption, 0-200 characters</param>
         /// <param name="fileName">A name for the file to be sent using <paramref name="audioStream" />.</param>
         /// <param name="duration">Duration of the audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
@@ -87,10 +90,10 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioAsync(long chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync(long chatId, [NotNull] Stream audioStream, string caption, string fileName, int duration, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotZero(chatId, nameof(chatId));
-            return this.SendAudioAsync(chatId.ToString(), audioStream, fileName, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendAudioAsync(chatId.ToString(), audioStream, caption, fileName, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -99,6 +102,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="audioStream">A <see cref="Stream" /> to the audio file to send.</param>
+        /// <param name="caption">Audio caption, 0-200 characters</param>
         /// <param name="fileName">A name for the file to be sent using <paramref name="audioStream" />.</param>
         /// <param name="duration">Duration of the audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
@@ -112,7 +116,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] Stream audioStream, string fileName, int duration, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioAsync([NotNull] string chatId, [NotNull] Stream audioStream, string caption, string fileName, int duration, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(audioStream, nameof(audioStream));
@@ -123,6 +127,9 @@
             content.AddIf(duration > 0, "duration", duration);
             content.AddIf(!string.IsNullOrWhiteSpace(performer), "performer", performer);
             content.AddIf(!string.IsNullOrWhiteSpace(title), "title", title);
+            content.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption.Length > 200
+                                                                               ? caption.Substring( 0, 200 )
+                                                                               : caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendAudio", content, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -132,6 +139,7 @@
         /// </summary>
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="filePath">Fully qualified path to the audio file.</param>
+        /// <param name="caption"></param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
         /// <param name="title">The track name.</param>
@@ -144,9 +152,9 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioFromFileAsync(long chatId, [NotNull] string filePath, string caption, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            return this.SendAudioFromFileAsync(chatId.ToString(), filePath, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendAudioFromFileAsync(chatId.ToString(), filePath, caption, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -155,6 +163,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="filePath">Fully qualified path to the audio file.</param>
+        /// <param name="caption"></param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="performer">The performer of the audio.</param>
         /// <param name="title">The track name.</param>
@@ -167,7 +176,7 @@
         /// <returns>
         /// On success, returns the sent <see cref="Message" />.
         /// </returns>
-        public Task<Message> SendAudioFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendAudioFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption = null, int duration = 0, string performer = null, string title = null, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));
@@ -175,7 +184,7 @@
 
             var fileName = Path.GetFileName(filePath);
             var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return this.SendAudioAsync(chatId, fileStream, fileName, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendAudioAsync(chatId, fileStream, fileName, caption, duration, performer, title, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         #endregion

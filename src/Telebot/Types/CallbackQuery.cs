@@ -39,11 +39,24 @@
         public string InlineMessageId { get; set; }
 
         /// <summary>
-        /// Gets or sets the <see cref="Message"/> with the callback button that originated the query. 
+        /// Gets or sets the <see cref="Message"/> with the callback button that originated the query.
         /// Note that message content and message date will not be available if the message is too old (Optional).
         /// </summary>
         [JsonProperty("message")]
         public Message Message { get; set; }
+
+        /// <summary>
+        /// Global identifier, uniquely corresponding to the chat to which the message with the callback button
+        /// was sent. Useful for high scores in games.
+        /// </summary>
+        [JsonProperty("chat_instance", Required = Required.Always)]
+        public string ChatInstance { get; set; }
+
+        /// <summary>
+        /// Gets or sets the Short name of a <see cref="Game"/> to be returned, serves as the unique identifier for the game (Optional).
+        /// </summary>
+        [JsonProperty("game_short_name")]
+        public string GameShortName { get; set; }
 
         #endregion
     }

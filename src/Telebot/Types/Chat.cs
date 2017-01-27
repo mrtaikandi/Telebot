@@ -1,7 +1,6 @@
 ﻿namespace Taikandi.Telebot.Types
 {
     using System.ComponentModel.DataAnnotations;
-
     using Newtonsoft.Json;
     using Newtonsoft.Json.Converters;
 
@@ -46,6 +45,12 @@
         /// </summary>
         [JsonProperty("username")]
         public string Username { get; set; }
+
+        /// <summary>
+        /// Gets or sets True if a group has ‘All Members Are Admins’ enabled (Optional).
+        /// </summary>
+        [JsonProperty("all_members_are_administrators")]
+        public bool AllMembersAreAdministrators { get; set; }
 
         #endregion
     }

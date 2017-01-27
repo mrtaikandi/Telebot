@@ -69,6 +69,15 @@ namespace TelebotConsole
                                 case UpdateType.Message:
                                     await this.CheckMessagesAsync(update);
                                     break;
+                                case UpdateType.EditedMessage:
+                                    await this.CheckMessagesAsync(update);
+                                    break;
+                                case UpdateType.ChannelPost:
+                                    await this.CheckMessagesAsync(update);
+                                    break;
+                                case UpdateType.EditedChannelPost:
+                                    await this.CheckMessagesAsync(update);
+                                    break;
                                 case UpdateType.InlineQuery:
                                     await this.CheckInlineQueryAsync(update);
                                     break;
@@ -112,22 +121,22 @@ namespace TelebotConsole
         Title = "This is a title",
         Url = "https://core.telegram.org/bots/api#inlinequeryresultarticle"
     };
-    
+
     var photoResult = new InlineQueryResultPhoto
     {
         Id = Guid.NewGuid().ToString("N"),
         Url = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b",
         ThumbnailUrl = "https://telegram.org/file/811140636/1/hzUbyxse42w/4cd52d0464b44e1e5b"
     };
-    
-    
+
+
     var gifResult = new InlineQueryResultGif
     {
         Id = Guid.NewGuid().ToString("N"),
         Url = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif",
         ThumbnailUrl = "https://upload.wikimedia.org/wikipedia/commons/thumb/2/2c/Rotating_earth_%28large%29.gif/200px-Rotating_earth_%28large%29.gif"
     };
-    
+
     var results = new InlineQueryResult[] { articleResult, photoResult, gifResult };
 
             var answerId = update.InlineQuery.Id;

@@ -45,9 +45,32 @@ namespace Taikandi.Telebot.Types
         [JsonProperty(PropertyName = "switch_inline_query")]
         public string SwitchInlineQuery { get; set; }
 
+        /// <summary>
+        /// Gets or sets the inline query of the current chat (Optional). See remarks for more information.
+        /// </summary>
+        /// <remarks>
+        /// If set, pressing the button will insert the bot‘s username and the specified inline query in the
+        /// current chat's input field. Can be empty, in which case only the bot’s username will be inserted.
+        /// <para>
+        /// This offers a quick way for the user to open your bot in inline mode in the same chat – good for
+        /// selecting something from multiple options.
+        /// </para>
+        /// </remarks>
+        [JsonProperty(PropertyName = "switch_inline_query_current_chat")]
+        public string SwitchInlineQueryCurrentChat { get; set; }
+
         /// <summary>Gets or sets the label text on the button.</summary>
         [JsonProperty(PropertyName = "text", Required = Required.Always)]
         public string Text { get; set; }
+
+        /// <summary>
+        /// Gets or sets description of the game that will be launched when the user presses the button.
+        /// </summary>
+        /// <remarks>
+        /// <c>NOTE:</c> This type of button <c>must</c> always be the first button in the first row.
+        /// </remarks>
+        [JsonProperty(PropertyName = "callback_game")]
+        public CallbackGame CallbackGame { get; set; }
 
         /// <summary>
         /// Gets or sets the HTTP url to be opened when button is pressed (Optional).

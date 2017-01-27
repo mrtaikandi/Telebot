@@ -4,11 +4,8 @@
     using System.Net.Http;
     using System.Threading;
     using System.Threading.Tasks;
-
     using JetBrains.Annotations;
-
     using Taikandi.Telebot.Types;
-
     using File = System.IO.File;
 
     public partial class Telebot
@@ -20,6 +17,7 @@
         /// </summary>
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="voice">Id of an audio file that is already on the Telegram servers to resend it.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
         /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
@@ -35,10 +33,10 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] string voice, string caption, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotZero(chatId, nameof(chatId));
-            return this.SendVoiceAsync(chatId.ToString(), voice, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendVoiceAsync(chatId.ToString(), voice, caption, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -47,6 +45,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="voice">Id of an audio file that is already on the Telegram servers to resend it.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
         /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
@@ -62,15 +61,17 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] string voice, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] string voice, string caption, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(voice, nameof(voice));
 
             var parameters = new NameValueCollection { { "voice", voice } };
 
-            if( duration > 0 )
-                parameters.Add("duration", duration);
+            parameters.AddIf(duration > 0, "duration", duration);
+            parameters.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption.Length > 200
+                                                                                 ? caption.Substring( 0, 200 )
+                                                                                 : caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendVoice", parameters, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -81,6 +82,7 @@
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="voiceStream">A <see cref="Stream" /> to the audio file to send.</param>
         /// <param name="fileName">A name for the file to be sent using <paramref name="voiceStream" />.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="duration">Duration of sent audio in seconds</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
         /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
@@ -96,10 +98,10 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync(long chatId, [NotNull] Stream voiceStream, string fileName, string caption, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotZero(chatId, nameof(chatId));
-            return this.SendVoiceAsync(chatId.ToString(), voiceStream, fileName, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendVoiceAsync(chatId.ToString(), voiceStream, fileName, caption, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -108,6 +110,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="voiceStream">A <see cref="Stream" /> to the audio file to send.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="fileName">A name for the file to be sent using <paramref name="voiceStream" />.</param>
         /// <param name="duration">Duration of sent audio in seconds</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
@@ -124,7 +127,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] Stream voiceStream, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceAsync([NotNull] string chatId, [NotNull] Stream voiceStream, string caption, string fileName, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(voiceStream, nameof(voiceStream));
@@ -133,8 +136,10 @@
             var content = new MultipartFormDataContent();
             content.Add("voice", voiceStream, fileName);
 
-            if( duration > 0 )
-                content.Add("duration", duration);
+            content.AddIf(duration > 0, "duration", duration);
+            content.AddIf(!string.IsNullOrWhiteSpace(caption), "caption", caption.Length > 200
+                                                                               ? caption.Substring( 0, 200 )
+                                                                               : caption);
 
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "sendVoice", content, chatId, replyToMessageId, replyMarkup, disableNotification);
         }
@@ -144,6 +149,7 @@
         /// </summary>
         /// <param name="chatId">Unique identifier for the message recipient.</param>
         /// <param name="filePath">Fully qualified path to the audio file.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
         /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
@@ -159,10 +165,10 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync(long chatId, [NotNull] string filePath, string caption, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotZero(chatId, nameof(chatId));
-            return this.SendVoiceFromFileAsync(chatId.ToString(), filePath, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendVoiceFromFileAsync(chatId.ToString(), filePath, caption, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         /// <summary>
@@ -171,6 +177,7 @@
         /// <param name="chatId">Unique identifier for the message recipient or username of the target channel (in the format
         /// @channelusername).</param>
         /// <param name="filePath">Fully qualified path to the audio file.</param>
+        /// <param name="caption">Voice message caption, 0-200 characters</param>
         /// <param name="duration">Duration of sent audio in seconds.</param>
         /// <param name="disableNotification">If set to <c>true</c> sends the message silently. iOS users will not receive a notification, Android users will receive a notification with no sound.</param>
         /// <param name="replyToMessageId">If the message is a reply, ID of the original message.</param>
@@ -186,7 +193,7 @@
         /// as <see cref="Audio" /> or <see cref="Document" />). Bots can currently send audio files of up to
         /// 50 MB in size, this limit may be changed in the future.
         /// </remarks>
-        public Task<Message> SendVoiceFromFileAsync([NotNull] string chatId, [NotNull] string filePath, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        public Task<Message> SendVoiceFromFileAsync([NotNull] string chatId, [NotNull] string filePath, string caption, int duration = 0, bool disableNotification = false, long replyToMessageId = 0, IReply replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
             Contracts.EnsureNotNull(chatId, nameof(chatId));
             Contracts.EnsureNotNull(filePath, nameof(filePath));
@@ -194,7 +201,7 @@
 
             var fileName = Path.GetFileName(filePath);
             var fileStream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
-            return this.SendVoiceAsync(chatId, fileStream, fileName, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
+            return this.SendVoiceAsync(chatId, fileStream, fileName, caption, duration, disableNotification, replyToMessageId, replyMarkup, cancellationToken);
         }
 
         #endregion
