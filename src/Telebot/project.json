@@ -1,66 +1,72 @@
 {
   "title": "Telebot",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Telegram Bot API client library for .NET that supports both Bot APIs 2.0 and inline Bot APIs.",
-  "authors": [ "Mohammadreza Taikandi" ],
-  "tags": [ "telegram", ".net telegram bot" ],
-  "projectUrl": "https://github.com/mrtaikandi/Telebot",
-  "licenseUrl": "https://github.com/mrtaikandi/Telebot/blob/master/LICENSE",
-  "iconUrl": "https://telegram.org/file/811140058/2/7GzMJk4Ij54/a1649c56fa9f805828",
-  "userSecretsId": "Telebot-A876D567-3D7E-46F8-8FD6-AD0D2C9AF065",
-
-  "dependencies": {
-    "Newtonsoft.Json": "8.0.1",    
-    "Microsoft.AspNet.WebApi.Client": "5.2.3"
+  "authors": ["Mohammadreza Taikandi"],
+  "packOptions": {
+    "tags": ["telegram", ".net telegram bot"],
+    "projectUrl": "https://github.com/mrtaikandi/Telebot",
+    "licenseUrl": "https://github.com/mrtaikandi/Telebot/blob/master/LICENSE",
+    "iconUrl": "https://telegram.org/file/811140058/2/7GzMJk4Ij54/a1649c56fa9f805828"
   },
-
+  "dependencies": {
+    "Microsoft.NETCore.Portable.Compatibility": "1.0.1",
+    "Newtonsoft.Json": "9.0.1"
+  },
   "frameworks": {
+    "netstandard1.3": {
+      "dependencies": {
+        "System.IO.FileSystem": "4.3.0",
+        "System.Net.Http": "4.3.0",
+        "System.ComponentModel.Annotations": "4.3.0"
+      },
+      "buildOptions": {
+        "define": [ "NETSTANDARD" ]
+      }
+    },
     "net45": {
+      "dependencies": {
+        "Microsoft.AspNet.WebApi.Client": "5.2.3"
+      },
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
         "System.Runtime.Serialization": "4.0.0.0"
       }
     },
     "net451": {
+      "dependencies": {
+        "Microsoft.AspNet.WebApi.Client": "5.2.3"
+      },
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
         "System.Runtime.Serialization": "4.0.0.0"
       }
     },
     "net452": {
+      "dependencies": {
+        "Microsoft.AspNet.WebApi.Client": "5.2.3"
+      },
       "frameworkAssemblies": {
         "System.ComponentModel.DataAnnotations": "4.0.0.0",
         "System.Runtime.Serialization": "4.0.0.0"
       }
     },
     "net46": {
-      "frameworkAssemblies": {
-        "System.ComponentModel.DataAnnotations": "4.0.0.0",
-        "System.Runtime.Serialization": "4.0.0.0"
-      }
-    },
-    "dnx451": {
-      "frameworkAssemblies": {
-        "System.ComponentModel.DataAnnotations": "4.0.0.0",
-        "System.Runtime.Serialization": "4.0.0.0"
-      }
-    },
-    "dnx452": {
-      "frameworkAssemblies": {
-        "System.ComponentModel.DataAnnotations": "4.0.0.0",
-        "System.Runtime.Serialization": "4.0.0.0"
-      }
-    },
-    "dnxcore50": {
       "dependencies": {
-        "System.Runtime.Extensions": "4.0.11-beta-23516",
-        "System.Linq.Expressions": "4.0.11-beta-23516",
-        "System.ComponentModel.Annotations": "4.0.11-beta-23516",
-        "System.IO": "4.0.11-beta-23516",
-        "System.IO.FileSystem": "4.0.1-beta-23516",
-        "System.Net.Http": "4.0.1-beta-23516",
-        "System.Runtime.Serialization.Primitives": "4.1.0-beta-23516",
-        "System.Runtime.Serialization.Xml": "4.1.0-beta-23516"
+        "Microsoft.AspNet.WebApi.Client": "5.2.3"
+      },
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.Runtime.Serialization": "4.0.0.0"
+      }
+    },
+    "net461": {
+      "dependencies": {
+        "Microsoft.AspNet.WebApi.Client": "5.2.3"
+      },
+      "frameworkAssemblies": {
+        "System.ComponentModel.DataAnnotations": "4.0.0.0",
+        "System.Runtime.Serialization": "4.0.0.0"
       }
     }
   }

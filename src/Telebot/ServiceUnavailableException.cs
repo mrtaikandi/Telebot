@@ -1,11 +1,11 @@
 ﻿namespace Taikandi.Telebot
 {
-    using System;    
+    using System;
 
     /// <summary>
     /// Represents errors that occur when Telegram API servers are not available.
     /// </summary>
-#if !DNXCORE50
+#if !NETSTANDARD
     [Serializable]
 #endif
     public class ServiceUnavailableException : Exception
@@ -18,11 +18,11 @@
         public ServiceUnavailableException(string message, Exception inner)
             : base(message, inner) { }
 
-#if !DNXCORE50
+#if !NETSTANDARD
         protected ServiceUnavailableException(
             System.Runtime.Serialization.SerializationInfo info,
             System.Runtime.Serialization.StreamingContext context)
             : base(info, context) { }
 #endif
-    }    
+    }
 }

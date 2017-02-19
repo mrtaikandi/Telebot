@@ -10,11 +10,14 @@
 
     using Newtonsoft.Json;
 
+#if NETSTANDARD
+    using Taikandi.Telebot.Extensions;
+#endif
     using Taikandi.Telebot.Types;
 
     public partial class Telebot
     {
-        #region Methods
+#region Methods
 
         /// <summary>
         /// Creates a new instance of <see cref="HttpClient" /> to connect to the Telegram bot API.
@@ -56,49 +59,102 @@
             }
         }
 
-        /// <summary>
-        /// Edits text messages sent by the bot or via the bot (for inline bots).
-        /// </summary>
-        /// <param name="chatId">Unique identifier for the target chat or username of the target channel (in the format @channelusername). Required if <paramref name="inlineMessageId"/> is not specified.</param>
-        /// <param name="messageId">Unique identifier of the sent message. Required if <paramref name="inlineMessageId"/> is not specified.</param>
-        /// <param name="inlineMessageId">The identifier of the inline message. Required if <paramref name="chatId"/> and <paramref name="messageId"/> are not specified.</param>
-        /// <param name="text">New text of the message</param>
-        /// <param name="parseMode">
-        /// A value from <see cref="ParseMode"/> enum indicates the way that the Telegram should parse the sent message.
-        /// Send <see cref="ParseMode.Markdown"/>, if you want Telegram apps to show bold, italic, fixed-width text or inline URLs in your bot's message.
-        /// </param>
-        /// <param name="disableWebPagePreview">Disables link previews for links in this message</param>
-        /// <param name="replyMarkup">An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
-        /// <returns>
-        /// A task that represents the asynchronous operation. The task results contains the edited <see cref="Message" /> on success.
-        /// </returns>
-        private Task<Message> EditMessageTextAsync(string chatId, long messageId, string inlineMessageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
+        private static void EnsureSuccessStatusCode(HttpResponseMessage response)
         {
-            Contracts.EnsureNotNull(text, nameof(text));
+            if( response.IsSuccessStatusCode )
+                return;
 
-            var parameters = new NameValueCollection();
+            if( response.StatusCode == HttpStatusCode.BadGateway )
+                throw new ServiceUnavailableException();
+
+            throw new HttpRequestException(response);
+        }
+
+        private static async Task<T> ReadTelegramResponseAsync<T>(HttpResponseMessage response)
+        {
+            if( response.IsSuccessStatusCode )
+            {
+                var telegramResponse = await response.Content.ReadAsAsync<TelegramResponse<T>>().ConfigureAwait(false);
+                return telegramResponse.Result;
+            }
+
+            if( response.StatusCode == HttpStatusCode.BadGateway )
+                throw new ServiceUnavailableException();
+
+            var error = await response.Content.ReadAsAsync<Error>().ConfigureAwait(false);
+            if( error != null )
+                throw new HttpRequestException($"Error '{error.ErrorCode}': {error.Description}");
+
+            throw new HttpRequestException(response);
+        }
+
+        private async Task<TResult> CallTelegramMethodAsync<TResult>(CancellationToken cancellationToken, string url, NameValueCollection parameters = null, string chatId = null, long replyToMessageId = 0, IReply replyMarkup = null, bool disableNotification = false)
+        {
+            if( parameters == null )
+            {
+                using( var response = await this.Client.GetAsync(url, cancellationToken).ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<TResult>(response).ConfigureAwait(false);
+                }
+            }
+
             parameters.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);
-            parameters.AddIf(messageId > 0, "message_id", messageId.ToString());
-            parameters.AddIf(!string.IsNullOrWhiteSpace(inlineMessageId), "inline_message_id", inlineMessageId);
-            parameters.Add("text", text);
-            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());
-            parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
+            parameters.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
+            parameters.AddIf(replyMarkup != null, "reply_markup", JsonConvert.SerializeObject(replyMarkup));
+            parameters.AddIf(this.DisableNotifications || disableNotification, "disable_notification ", true);
 
-            return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageText", parameters, replyMarkup: replyMarkup);
+            using( var content = new FormUrlEncodedContent(parameters) )
+            {
+                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<TResult>(response).ConfigureAwait(false);
+                }
+            }
+        }
+
+        private async Task<TResult> CallTelegramMethodAsync<TResult>(CancellationToken cancellationToken, [NotNull] string url, [NotNull] MultipartFormDataContent content, string chatId = null, long replyToMessageId = 0, IReply replyMarkup = null, bool disableNotification = false)
+        {
+            using( content )
+            {
+                content.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);
+                content.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
+                content.AddIf(replyMarkup != null, "reply_markup", replyMarkup);
+                content.AddIf(this.DisableNotifications || disableNotification, "disable_notification ", true);
+
+                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
+                {
+                    return await ReadTelegramResponseAsync<TResult>(response).ConfigureAwait(false);
+                }
+            }
         }
 
         /// <summary>
-        /// Edits captions of the message with the provided identifier sent by the bot or via the bot (for inline bots).
+        /// Edits captions of the message with the provided identifier sent by the bot or via the bot (for
+        /// inline bots).
         /// </summary>
-        /// <param name="chatId">Unique identifier for the target chat or username of the target channel (in the format @channelusername). Required if <paramref name="inlineMessageId" /> is not specified.</param>
-        /// <param name="messageId">Unique identifier of the sent message. Required if <paramref name="inlineMessageId" /> is not specified.</param>
-        /// <param name="inlineMessageId">Identifier of the inline message. Required if <paramref name="chatId"/> and <paramref name="messageId"/> are not specified. </param>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target channel (in the format
+        /// @channelusername). Required if <paramref name="inlineMessageId" /> is not specified.
+        /// </param>
+        /// <param name="messageId">
+        /// Unique identifier of the sent message. Required if <paramref name="inlineMessageId" /> is not
+        /// specified.
+        /// </param>
+        /// <param name="inlineMessageId">
+        /// Identifier of the inline message. Required if <paramref name="chatId" /> and
+        /// <paramref name="messageId" /> are not specified.
+        /// </param>
         /// <param name="caption">New caption of the message.</param>
-        /// <param name="replyMarkup">An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <param name="replyMarkup">
+        /// An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
         /// <returns>
-        /// A task that represents the asynchronous operation. On success the task results contains the edited Message is returned.
+        /// A task that represents the asynchronous operation. On success the task results contains the edited
+        /// Message is returned.
         /// </returns>
         private Task<Message> EditMessageCaptionAsync(string chatId, long messageId, string inlineMessageId, [NotNull] string caption, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -116,13 +172,28 @@
         /// <summary>
         /// Edit only the reply markup of messages sent by the bot or via the bot (for inline bots).
         /// </summary>
-        /// <param name="chatId">Unique identifier for the target chat or username of the target channel (in the format @channelusername). Required if <paramref name="inlineMessageId" /> is not specified.</param>
-        /// <param name="messageId">Unique identifier of the sent message. Required if <paramref name="inlineMessageId" /> is not specified.</param>
-        /// <param name="inlineMessageId">Identifier of the inline message. Required if <paramref name="chatId" /> and <paramref name="messageId" /> are not specified.</param>
-        /// <param name="replyMarkup">An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.</param>
-        /// <param name="cancellationToken">A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to complete.</param>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target channel (in the format
+        /// @channelusername). Required if <paramref name="inlineMessageId" /> is not specified.
+        /// </param>
+        /// <param name="messageId">
+        /// Unique identifier of the sent message. Required if <paramref name="inlineMessageId" /> is not
+        /// specified.
+        /// </param>
+        /// <param name="inlineMessageId">
+        /// Identifier of the inline message. Required if <paramref name="chatId" /> and
+        /// <paramref name="messageId" /> are not specified.
+        /// </param>
+        /// <param name="replyMarkup">
+        /// An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
         /// <returns>
-        /// A task that represents the asynchronous operation. On success the task results contains the edited Message is returned.
+        /// A task that represents the asynchronous operation. On success the task results contains the edited
+        /// Message is returned.
         /// </returns>
         private Task<Message> EditMessageReplyMarkupAsync(string chatId, long messageId, string inlineMessageId, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
@@ -134,75 +205,54 @@
             return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageReplyMarkup", parameters, replyMarkup: replyMarkup);
         }
 
-        private static void EnsureSuccessStatusCode(HttpResponseMessage response)
+        /// <summary>
+        /// Edits text messages sent by the bot or via the bot (for inline bots).
+        /// </summary>
+        /// <param name="chatId">
+        /// Unique identifier for the target chat or username of the target channel (in the format
+        /// @channelusername). Required if <paramref name="inlineMessageId" /> is not specified.
+        /// </param>
+        /// <param name="messageId">
+        /// Unique identifier of the sent message. Required if <paramref name="inlineMessageId" /> is not
+        /// specified.
+        /// </param>
+        /// <param name="inlineMessageId">
+        /// The identifier of the inline message. Required if <paramref name="chatId" /> and
+        /// <paramref name="messageId" /> are not specified.
+        /// </param>
+        /// <param name="text">New text of the message</param>
+        /// <param name="parseMode">
+        /// A value from <see cref="ParseMode" /> enum indicates the way that the Telegram should parse the
+        /// sent message. Send <see cref="ParseMode.Markdown" />, if you want Telegram apps to show bold,
+        /// italic, fixed-width text or inline URLs in your bot's message.
+        /// </param>
+        /// <param name="disableWebPagePreview">Disables link previews for links in this message</param>
+        /// <param name="replyMarkup">
+        /// An <see cref="InlineKeyboardMarkup" /> object for a custom reply keyboard.
+        /// </param>
+        /// <param name="cancellationToken">
+        /// A <see cref="T:System.Threading.CancellationToken" /> to observe while waiting for the task to
+        /// complete.
+        /// </param>
+        /// <returns>
+        /// A task that represents the asynchronous operation. The task results contains the edited
+        /// <see cref="Message" /> on success.
+        /// </returns>
+        private Task<Message> EditMessageTextAsync(string chatId, long messageId, string inlineMessageId, [NotNull] string text, ParseMode parseMode = ParseMode.Normal, bool disableWebPagePreview = false, InlineKeyboardMarkup replyMarkup = null, CancellationToken cancellationToken = default(CancellationToken))
         {
-            if( response.IsSuccessStatusCode )
-                return;
+            Contracts.EnsureNotNull(text, nameof(text));
 
-            if( response.StatusCode == HttpStatusCode.BadGateway )
-                throw new ServiceUnavailableException();
-
-            throw new HttpRequestException(response);
-        }
-
-        private static async Task<T> ReadTelegramResponseAsync<T>(HttpResponseMessage response, CancellationToken cancellationToken)
-        {
-            if( response.IsSuccessStatusCode )
-            {
-                var telegramResponse = await response.Content.ReadAsAsync<TelegramResponse<T>>(cancellationToken).ConfigureAwait(false);
-                return telegramResponse.Result;
-            }
-
-            if( response.StatusCode == HttpStatusCode.BadGateway )
-                throw new ServiceUnavailableException();
-
-            var error = await response.Content.ReadAsAsync<Error>(cancellationToken).ConfigureAwait(false);
-            if( error != null )
-                throw new HttpRequestException($"Error '{error.ErrorCode}': {error.Description}");
-
-            throw new HttpRequestException(response);
-        }
-
-        private async Task<TResult> CallTelegramMethodAsync<TResult>(CancellationToken cancellationToken, string url, NameValueCollection parameters = null, string chatId = null, long replyToMessageId = 0, IReply replyMarkup = null, bool disableNotification = false)
-        {
-            if( parameters == null )
-            {
-                using( var response = await this.Client.GetAsync(url, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<TResult>(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
-
+            var parameters = new NameValueCollection();
             parameters.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);
-            parameters.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
-            parameters.AddIf(replyMarkup != null, "reply_markup", JsonConvert.SerializeObject(replyMarkup));
-            parameters.AddIf(this.DisableNotifications || disableNotification, "disable_notification ", true);
+            parameters.AddIf(messageId > 0, "message_id", messageId.ToString());
+            parameters.AddIf(!string.IsNullOrWhiteSpace(inlineMessageId), "inline_message_id", inlineMessageId);
+            parameters.Add("text", text);
+            parameters.AddIf(parseMode != ParseMode.Normal, "parse_mode", parseMode.ToString());
+            parameters.AddIf(disableWebPagePreview, "disable_web_page_preview", true);
 
-            using( var content = new FormUrlEncodedContent(parameters) )
-            {
-                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<TResult>(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
+            return this.CallTelegramMethodAsync<Message>(cancellationToken, "editMessageText", parameters, replyMarkup: replyMarkup);
         }
 
-        private async Task<TResult> CallTelegramMethodAsync<TResult>(CancellationToken cancellationToken, [NotNull] string url, [NotNull] MultipartFormDataContent content, string chatId = null, long replyToMessageId = 0, IReply replyMarkup = null, bool disableNotification = false)
-        {
-            using( content )
-            {
-                content.AddIf(!string.IsNullOrWhiteSpace(chatId), "chat_id", chatId);
-                content.AddIf(replyToMessageId > 0, "reply_to_message_id", replyToMessageId.ToString());
-                content.AddIf(replyMarkup != null, "reply_markup", replyMarkup);
-                content.AddIf(this.DisableNotifications || disableNotification, "disable_notification ", true);
-
-                using( var response = await this.Client.PostAsync(url, content, cancellationToken).ConfigureAwait(false) )
-                {
-                    return await ReadTelegramResponseAsync<TResult>(response, cancellationToken).ConfigureAwait(false);
-                }
-            }
-        }
-
-        #endregion
+#endregion
     }
 }
